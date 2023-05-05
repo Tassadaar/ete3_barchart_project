@@ -13,6 +13,6 @@ for seq_record in SeqIO.parse("input_files/nematode.fasta", "fasta"):
     alignments.append(seq_record)
 
 # output amino acid frequencies
-for alignment in alignments:
-    aa_frequencies = CustomProteinAnalysis(alignment.seq).get_amino_acids_percent()
+for seq_record in alignments:
+    aa_frequencies = CustomProteinAnalysis(seq_record.seq).get_amino_acids_percent()
     print(aa_frequencies)

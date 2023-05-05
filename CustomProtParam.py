@@ -1,6 +1,6 @@
 """
 This program implements changes made to class ProteinAnalysis in python 3.11 to ensure functionality
-when using an older version of python for dependency.
+when using an older version of python for dependency issues.
 """
 
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
@@ -10,7 +10,7 @@ class CustomProteinAnalysis(ProteinAnalysis):
 
     def __init__(self, prot_sequence, monoisotopic=False):
         """Initialize the class."""
-        self.sequence = prot_sequence.upper()
+        self.sequence = prot_sequence.replace("-", "").upper()  # no gaps
         self.amino_acids_content = None
         self.amino_acids_percent = None
         self.length = len(self.sequence)
