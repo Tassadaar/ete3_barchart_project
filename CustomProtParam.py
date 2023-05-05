@@ -6,7 +6,7 @@ when using an older version of python for dependency.
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 
 
-class ModdedProteinAnalysis(ProteinAnalysis):
+class CustomProteinAnalysis(ProteinAnalysis):
 
     def __init__(self, prot_sequence, monoisotopic=False):
         """Initialize the class."""
