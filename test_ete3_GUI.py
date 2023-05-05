@@ -3,6 +3,7 @@ This program makes a simple unrooted tree from a newwick string, and show said t
 """
 
 from ete3 import Tree
+from ete3 import BarChartFace
 
 # variable initiations
 newwick_tree = "input_files/nematode_CH.tree"
