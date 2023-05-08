@@ -18,16 +18,15 @@ class FrequencyCalculator:
     def calculate_frequency(self):
         taxa_list = []  # array to store taxa
 
-        # read in fasta and parse
+        # read in fasta and parse, then update
         for seq_record in SeqIO.parse(self.file_location, self.file_format):
             new_taxon = Taxon()
             new_taxon.name = seq_record.id
             new_taxon.seq = seq_record.seq
             taxa_list.append(new_taxon)
 
-        # output amino acid frequencies
+        # update amino acid frequencies
         for new_taxon in taxa_list:
-            # make a new tuple from a tuple of two lists
             aa_frequencies = CustomProteinAnalysis(new_taxon.seq).get_amino_acids_percent()
             new_taxon.aa_list = aa_frequencies[0]
             new_taxon.freq_list = aa_frequencies[1]
