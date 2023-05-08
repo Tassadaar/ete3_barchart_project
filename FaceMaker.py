@@ -14,4 +14,7 @@ from FrequencyCalculator import FrequencyCalculator
 # print(unrooted_tree)
 #unrooted_tree.show()
 
-print(FrequencyCalculator("input_files/nematode.fasta", "fasta").calculate_frequency())
+taxa_list = FrequencyCalculator("input_files/nematode.fasta", "fasta").calculate_frequency()
+
+for new_taxon in taxa_list:
+    print(new_taxon)
