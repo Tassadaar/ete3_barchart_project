@@ -22,6 +22,6 @@ class FaceMaker:
 
         for taxon in taxa_list:
             new_face = BarChartFace(taxon.freq_list, 100, 50, (0, 0, 255), taxon.aa_list, None, 1)
-            face_dict[new_face] = taxon.name
+            face_dict[taxon.name] = new_face
 
         return face_dict
