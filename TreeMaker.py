@@ -3,7 +3,7 @@ This program makes a simple unrooted tree from a newwick string, and show said t
 """
 
 import argparse
-from ete3 import Tree
+from ete3 import Tree, faces, TreeStyle
 from FaceMaker import FaceMaker
 
 # specify tags
@@ -21,11 +21,17 @@ face_dict = FaceMaker(file_location, file_format).make_face()
 # tree "growing"
 tree = Tree(newwick_tree)
 
-# add faces to the tree
-for node in tree.traverse():
+# tree styling
+tree_style = TreeStyle()
+tree_style.show_scale = False  # do not show scale
+
+
+# layout function
+def layout_fn(node):
     if node.is_leaf():
         face = face_dict[node.name]
-        node.add_face(face, column=1, position="branch-right")
+        faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
+
 
 # render to "file name"
-tree.render("test.png", units="px", h=1920, w=1080)
+tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout_fn)
