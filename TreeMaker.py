@@ -8,15 +8,18 @@ from FaceMaker import FaceMaker
 
 # specify tags
 parser = argparse.ArgumentParser(description='Tree making')
+
 parser.add_argument('-t', '--tree', required=True)
 parser.add_argument('-n', '--filename', required=True)
 parser.add_argument('-f', '--format', required=True)
+
 args = parser.parse_args()
 
-# variable initiations
 newwick_tree = args.tree
 file_location = args.filename
 file_format = args.format
+
+# variable initiation
 face_dict = FaceMaker(file_location, file_format).make_face()
 
 # tree "growing"
