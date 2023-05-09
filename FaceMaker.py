@@ -21,7 +21,14 @@ class FaceMaker:
         face_dict = {}
 
         for taxon in taxa_list:
-            new_face = BarChartFace(taxon.freq_list, 100, 50, (0, 0, 255), taxon.aa_list, None, 1)
-            face_dict[taxon.name] = new_face
+            face = BarChartFace(taxon.freq_list)
+            face.width = 100
+            face.height = 50
+            face.colors = ["blue" for i in range(len(taxon.freq_list))]  # to make sure it doesn't run out of colors
+            face.labels = taxon.aa_list
+            face.min_value = None
+            face.max_value = 0.2
+
+            face_dict[taxon.name] = face
 
         return face_dict

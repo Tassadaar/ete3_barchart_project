@@ -3,8 +3,7 @@ This program makes a simple unrooted tree from a newwick string, and show said t
 """
 
 import argparse
-from ete3 import PhyloTree
-from Bio import Phylo
+from ete3 import Tree
 from FaceMaker import FaceMaker
 
 # specify tags
@@ -20,12 +19,13 @@ file_format = "fasta" #args.format
 face_dict = FaceMaker(file_location, file_format).make_face()
 
 # tree "growing"
-tree = PhyloTree(newwick_tree)
+tree = Tree(newwick_tree)
 
-# print(unrooted_tree)
+# add faces to the tree
 for node in tree.traverse():
-    if node.name != "":
+    if node.is_leaf():
         face = face_dict[node.name]
-        node.add_face(face, column=0, position="branch-right")
+        node.add_face(face, column=1, position="branch-right")
 
-Phylo.draw(tree)
+# render to "file name"
+tree.render("test.png", units="px", h=1920, w=1080)
