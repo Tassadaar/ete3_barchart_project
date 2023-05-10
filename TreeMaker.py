@@ -1,5 +1,5 @@
 """
-This program makes a simple unrooted tree from a newwick string, and show said tree in GUI.
+This program makes a simple unrooted tree from a newwick string, and render said tree to PNG image.
 """
 
 import argparse
