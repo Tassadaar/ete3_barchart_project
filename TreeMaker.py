@@ -19,8 +19,9 @@ newwick_tree = args.tree
 file_location = args.filename
 file_format = args.format
 
-# variable initiation
-face_dict = FaceMaker(file_location, file_format).make_face()
+# making faces
+faceMaker = FaceMaker(file_location, file_format)
+face_dict = faceMaker.make_barchartface()
 
 # tree "growing"
 tree = Tree(newwick_tree)
