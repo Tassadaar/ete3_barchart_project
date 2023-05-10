@@ -7,17 +7,19 @@ from ete3 import Tree, faces, TreeStyle
 from FaceMaker import FaceMaker
 
 # specify tags
-parser = argparse.ArgumentParser(description='Tree making')
+parser = argparse.ArgumentParser(description="Tree making")
 
-parser.add_argument('-t', '--tree', required=True)
-parser.add_argument('-n', '--filename', required=True)
-parser.add_argument('-f', '--format', required=True)
+parser.add_argument("-t", "--tree", required=True)
+parser.add_argument("-n", "--filename", required=True)
+parser.add_argument("-f", "--format", required=True)
+parser.add_argument("-m", "--mode", type=str, default="normal")
 
 args = parser.parse_args()
 
 newwick_tree = args.tree
 file_location = args.filename
 file_format = args.format
+mode = args.mode
 
 # making faces
 faceMaker = FaceMaker(file_location, file_format)
@@ -38,5 +40,13 @@ def layout_fn(node):
         faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
 
 
-# render to "file name"
-tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout_fn)
+try:
+    if mode == "normal":
+        # render to "file name"
+        tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout_fn)
+    elif mode == "special":
+        print("Get pranked, sucker!")
+    else:
+        raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")
+except ValueError as e:
+    print(f"Error: {e}")
