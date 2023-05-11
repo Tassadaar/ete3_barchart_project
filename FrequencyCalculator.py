@@ -28,7 +28,6 @@ class FrequencyCalculator:
         # update amino acid frequencies
         for taxon in taxa_list:
             aa_frequencies = CustomProteinAnalysis(taxon.seq).get_amino_acids_percent()
-            taxon.aa_list = aa_frequencies[0]
-            taxon.freq_list = aa_frequencies[1]
+            taxon.freq_dict = aa_frequencies
 
         return taxa_list

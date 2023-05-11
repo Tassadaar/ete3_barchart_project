@@ -2,7 +2,7 @@
 This program implements changes made to class ProteinAnalysis in python 3.11 to ensure functionality
 when using an older version of python for dependency issues.
 
-Return: tuple([aa], [frequencies])
+Return: dict{aa, frequencies}
 """
 
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
@@ -29,15 +29,12 @@ class CustomProteinAnalysis(ProteinAnalysis):
         input is the dictionary self.amino_acids_content.
         output is a dictionary with amino acids as keys.
         """
-        aa_list = []
-        freq_list = []
 
         if self.amino_acids_percent is None:
             aa_counts = self.count_amino_acids()
 
-            for aa, count in aa_counts.items():
-                aa_list.append(aa)
-                freq_list.append(count / self.length)
+            percentages = {aa: count / self.length for aa, count in aa_counts.items()}
 
-        aa_tuple = (aa_list, freq_list)
-        return aa_tuple
+            self.amino_acids_percent = percentages
+
+        return self.amino_acids_percent

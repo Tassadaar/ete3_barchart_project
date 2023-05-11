@@ -6,8 +6,7 @@ This program implements a holder for taxon attributes: name, seq, amino acid con
 class Taxon:
     name = None
     seq = None
-    aa_list = []
-    freq_list = []
+    freq_dict = {}
 
     def __str__(self):
-        return f"{self.name}\n{self.seq}\n{self.aa_list}\n{self.freq_list}\n"
+        return f"{self.name}\n{self.seq}\n{self.freq_dict}\n"
