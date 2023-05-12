@@ -4,6 +4,7 @@ This program makes a simple unrooted tree from a newwick string, and render said
 
 import argparse
 from ete3 import Tree, faces, TreeStyle
+from FrequencyCalculator import FrequencyCalculator
 from FaceMaker import FaceMaker
 
 # specify tags
@@ -21,9 +22,15 @@ file_location = args.filename
 file_format = args.format
 mode = args.mode
 
+# get taxa list
+taxa_list = FrequencyCalculator(file_location, file_format).get_taxa_list()
+
 # making faces
-faceMaker = FaceMaker(file_location, file_format)
-face_dict = faceMaker.make_barchartface()
+faceMaker = FaceMaker()
+face_dict = {}
+
+for taxon in taxa_list:
+    face_dict[taxon.name] = faceMaker.make_barchartface(taxon)
 
 # tree "growing"
 tree = Tree(newwick_tree)
