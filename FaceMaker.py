@@ -17,7 +17,7 @@ class FaceMaker:
         self.file_format = file_format
 
     def make_barchartface(self):
-        taxa_list = FrequencyCalculator(self.file_location, self.file_format).calculate_frequency()
+        taxa_list = FrequencyCalculator(self.file_location, self.file_format).get_taxa_list()
         face_dict = {}
 
         for taxon in taxa_list:

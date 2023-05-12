@@ -5,7 +5,6 @@ Returns: list(taxa)
 """
 
 from Bio import SeqIO
-from CustomProtParam import CustomProteinAnalysis
 from TaxonHolder import Taxon
 
 
@@ -15,19 +14,13 @@ class FrequencyCalculator:
         self.file_location = file_location
         self.file_format = file_format
 
-    def calculate_frequency(self):
+    def get_taxa_list(self):
         taxa_list = []  # array to store taxa
 
         # read in fasta and parse, then update
         for seq_record in SeqIO.parse(self.file_location, self.file_format):
-            new_taxon = Taxon()
-            new_taxon.name = seq_record.id
-            new_taxon.seq = seq_record.seq
+            new_taxon = Taxon(seq_record.id, seq_record.seq)
+            new_taxon.calculate_all_amino_acid_frequencies()
             taxa_list.append(new_taxon)
-
-        # update amino acid frequencies
-        for taxon in taxa_list:
-            aa_frequencies = CustomProteinAnalysis(taxon.seq).get_amino_acids_percent()
-            taxon.freq_dict = aa_frequencies
 
         return taxa_list
