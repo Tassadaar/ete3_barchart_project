@@ -11,13 +11,13 @@ from FrequencyCalculator import FrequencyCalculator
 class FaceMaker:
 
     @staticmethod
-    def make_barchartface(taxon):
+    def make_barchartface(freq_dict):
 
-        face = BarChartFace(list(taxon.freq_dict.values()))
+        face = BarChartFace(list(freq_dict.values()))
         face.width = 100
         face.height = 50
-        face.colors = ["blue" for key in list(taxon.freq_dict.keys())]  # ensure it doesn't run out of colors
-        face.labels = list(taxon.freq_dict.keys())
+        face.colors = ["blue" for key in list(freq_dict.keys())]  # ensure it doesn't run out of colors
+        face.labels = list(freq_dict.keys())
         face.min_value = None
         face.max_value = 0.2
 

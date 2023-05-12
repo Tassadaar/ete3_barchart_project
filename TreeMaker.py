@@ -28,9 +28,16 @@ taxa_list = FrequencyCalculator(file_location, file_format).get_taxa_list()
 # making faces
 faceMaker = FaceMaker()
 face_dict = {}
+fymink_dict = {}
+garp_dict = {}
+others_dict = {}
 
 for taxon in taxa_list:
-    face_dict[taxon.name] = faceMaker.make_barchartface(taxon)
+    face_dict[taxon.name] = faceMaker.make_barchartface(taxon.freq_dict)
+    fymink_dict[taxon.name] = faceMaker.make_barchartface(taxon.fymink_freq_dict)
+    garp_dict[taxon.name] = faceMaker.make_barchartface(taxon.garp_freq_dict)
+    others_dict[taxon.name] = faceMaker.make_barchartface(taxon.others_freq_dict)
+
 
 # tree "growing"
 tree = Tree(newwick_tree)

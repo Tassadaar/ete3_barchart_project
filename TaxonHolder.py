@@ -9,9 +9,7 @@ class Taxon:
     freq_dict = {}
     fymink_freq_dict = {}
     garp_freq_dict = {}
-    all_face = None
-    fymink_face = None
-    garp_face = None
+    others_freq_dict = {}
 
     def __init__(self, name, seq):
         self.name = name
@@ -23,6 +21,17 @@ class Taxon:
         sorted_dict = {key: unsorted_freq_dict[key] for key in sorted_keys}
         sorted_dict.pop("-")
         self.freq_dict = sorted_dict
+
+        fymink = ["F", "Y", "M", "I", "N", "K"]
+        garp = ["G", "A", "R", "P"]
+
+        for key, value in sorted_dict.items():
+            if key in fymink:
+                self.fymink_freq_dict[key] = value
+            elif key in garp:
+                self.garp_freq_dict[key] = value
+            else:
+                self.others_freq_dict[key] = value
 
     def __str__(self):
         return f"{self.name}\n{self.seq}\n{self.freq_dict}\n"
