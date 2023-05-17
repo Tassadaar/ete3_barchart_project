@@ -54,12 +54,22 @@ def layout_fn(node):
         faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
 
 
+def layout_sp(node):
+    if node.is_leaf():
+        fymink_face = fymink_dict[node.name]
+        garp_face = garp_dict[node.name]
+        others_face = others_dict[node.name]
+        faces.add_face_to_node(face=fymink_face, node=node, column=1, position="aligned")
+        #faces.add_face_to_node(face=garp_face, node=node, column=2, position="aligned")
+        #faces.add_face_to_node(face=others_face, node=node, column=3, position="aligned")
+
+
 try:
     if mode == "normal":
         # render to "file name"
         tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout_fn)
     elif mode == "special":
-        print("Get pranked, sucker!")
+        tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout_sp)
     else:
         raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")
 except ValueError as e:

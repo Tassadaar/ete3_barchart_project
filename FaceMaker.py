@@ -5,7 +5,6 @@ Returns: dictionary(faces)
 """
 
 from ete3 import BarChartFace
-from FrequencyCalculator import FrequencyCalculator
 
 
 class FaceMaker:

@@ -16,10 +16,14 @@ class Taxon:
         self.seq = seq
 
     def calculate_all_amino_acid_frequencies(self):
-        unsorted_freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in self.seq}
+        all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
+        unsorted_freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in all_amino_acids}
         sorted_keys = sorted(unsorted_freq_dict.keys())
         sorted_dict = {key: unsorted_freq_dict[key] for key in sorted_keys}
-        sorted_dict.pop("-")
+
+        if "-" in sorted_dict.keys():
+            sorted_dict.pop("-")
+
         self.freq_dict = sorted_dict
 
         fymink = ["F", "Y", "M", "I", "N", "K"]
@@ -34,4 +38,4 @@ class Taxon:
                 self.others_freq_dict[key] = value
 
     def __str__(self):
-        return f"{self.name}\n{self.seq}\n{self.freq_dict}\n"
+        return f"{self.name}\n{self.fymink_freq_dict}\n{self.garp_freq_dict}\n"
