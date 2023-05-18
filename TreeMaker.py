@@ -22,30 +22,7 @@ file_format = args.format
 mode = args.mode
 
 # get taxa list
-taxa_list = FrequencyCalculator(file_location, file_format).get_taxa_list()
-
-# making faces
-#faceMaker = FaceMaker()
-face_dict = {}
-fymink_dict = {}
-garp_dict = {}
-others_dict = {}
-
-for taxon in taxa_list:
-    #face_dict[taxon.name] = faceMaker.make_barchartface(taxon.freq_dict)
-    face_dict[taxon.name] = BarChartFace(
-        values=list(taxon.freq_dict.values()),
-        labels=list(taxon.freq_dict.keys()),
-        colors= ["blue" for key in taxon.freq_dict.keys()],
-        max_value = 0.2,
-        width=100,
-        height=50
-    )
-    #fymink_dict[taxon.name] = faceMaker.make_barchartface(taxon.fymink_freq_dict)
-    #garp_dict[taxon.name] = faceMaker.make_barchartface(taxon.garp_freq_dict)
-    #others_dict[taxon.name] = faceMaker.make_barchartface(taxon.others_freq_dict)
-
-print(fymink_dict)
+taxa_list = FrequencyCalculator(file_location, file_format).get_taxa_list(mode)
 
 # tree "growing"
 tree = Tree(newwick_tree)
@@ -58,15 +35,32 @@ tree_style.show_scale = False  # do not show scale
 # layout function
 def layout_fn(node):
     if node.is_leaf():
-        face = face_dict[node.name]
+        taxon = taxa_list[node.name]
+        face = BarChartFace(
+            values=list(taxon.freq_dict.values()),
+            labels=list(taxon.freq_dict.keys()),
+            colors= ["blue" for key in taxon.freq_dict.keys()],
+            max_value = 0.2,
+            width=100,
+            height=50
+        )
         faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
 
 
 def layout_sp(node):
     if node.is_leaf(): # && node.name = "HONEYBEE":
-        fymink_face = fymink_dict[node.name]
-        garp_face = garp_dict[node.name]
-        others_face = others_dict[node.name]
+        taxon = taxa_list[node.name]
+        fymink_face = BarChartFace(
+            values=list(taxon.fymink_freq_dict.values()),
+            labels=list(taxon.fymink_freq_dict.keys()),
+            colors= ["blue" for key in taxon.fymink_freq_dict.keys()],
+            max_value = 0.2,
+            width=100,
+            height=50
+        )
+        print(taxon.freq_dict.values())
+        #garp_face = garp_dict[node.name]
+        #others_face = others_dict[node.name]
         #print(fymink_face.values)
         faces.add_face_to_node(face=fymink_face, node=node, column=1, position="aligned")
         #faces.add_face_to_node(face=garp_face, node=node, column=2, position="aligned")
