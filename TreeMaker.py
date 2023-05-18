@@ -36,6 +36,8 @@ tree_style.show_scale = False  # do not show scale
 def layout_fn(node):
     if node.is_leaf():
         taxon = taxa_list[node.name]
+
+        # if mode ==
         face = BarChartFace(
             values=list(taxon.freq_dict.values()),
             labels=list(taxon.freq_dict.keys()),
@@ -50,21 +52,47 @@ def layout_fn(node):
 def layout_sp(node):
     if node.is_leaf(): # && node.name = "HONEYBEE":
         taxon = taxa_list[node.name]
-        fymink_face = BarChartFace(
-            values=list(taxon.fymink_freq_dict.values()),
-            labels=list(taxon.fymink_freq_dict.keys()),
-            colors= ["blue" for key in taxon.fymink_freq_dict.keys()],
-            max_value = 0.2,
-            width=100,
-            height=50
-        )
-        print(taxon.freq_dict.values())
-        #garp_face = garp_dict[node.name]
-        #others_face = others_dict[node.name]
-        #print(fymink_face.values)
-        faces.add_face_to_node(face=fymink_face, node=node, column=1, position="aligned")
-        #faces.add_face_to_node(face=garp_face, node=node, column=2, position="aligned")
-        #faces.add_face_to_node(face=others_face, node=node, column=3, position="aligned")
+
+        i=1
+        for attr in [ taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict ]:
+            face = BarChartFace(
+                values=list( attr.values() ),
+                labels=list( attr.keys() ),
+                colors=["blue" for key in attr.keys()],
+                max_value= 0.2,
+                width = 100,
+                height = 50
+            )
+            faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
+            i+=1
+
+        # fymink_face = BarChartFace(
+        #     values=list(taxon.fymink_freq_dict.values()),
+        #     labels=list(taxon.fymink_freq_dict.keys()),
+        #     colors= ["blue" for key in taxon.fymink_freq_dict.keys()],
+        #     max_value = 0.2,
+        #     width=100,
+        #     height=50
+        # )
+        # garp_face = BarChartFace(
+        #     values=list(taxon.garp_freq_dict.values()),
+        #     labels=list(taxon.garp_freq_dict.keys()),
+        #     colors= ["blue" for key in taxon.garp_freq_dict.keys()],
+        #     max_value = 0.2,
+        #     width=100,
+        #     height=50
+        # )
+        # other_face = BarChartFace(
+        #     values=list(taxon.other_freq_dict.values()),
+        #     labels=list(taxon.other_freq_dict.keys()),
+        #     colors= ["blue" for key in taxon.other_freq_dict.keys()],
+        #     max_value = 0.2,
+        #     width=100,
+        #     height=50
+        # )
+        # faces.add_face_to_node(face=fymink_face, node=node, column=1, position="aligned")
+        # faces.add_face_to_node(face=garp_face, node=node, column=2, position="aligned")
+        # faces.add_face_to_node(face=other_face, node=node, column=3, position="aligned")
 
 
 try:
