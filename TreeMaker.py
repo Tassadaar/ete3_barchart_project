@@ -5,8 +5,9 @@ This program makes a simple unrooted tree from a newwick string, and render said
 import argparse
 import sys
 
+from Bio import SeqIO
+from TaxonHolder import Taxon
 from ete3 import Tree, faces, TreeStyle, BarChartFace
-from FrequencyCalculator import FrequencyCalculator
 
 # specify tags
 parser = argparse.ArgumentParser(description="Tree making")
@@ -23,8 +24,15 @@ file_location = args.filename
 file_format = args.format
 mode = args.mode
 
-# get taxa list
-taxa_list = FrequencyCalculator(file_location, file_format).get_taxa_list(mode)
+taxa_dict = {}  # dictionary to store taxa
+
+# read in fasta and parse, then update
+for seq_record in SeqIO.parse(file_location, file_format):
+    new_taxon = Taxon(seq_record.id, seq_record.seq)
+    new_taxon.calculate_all_amino_acid_frequencies()
+    if mode == "special":
+        new_taxon.calculate_fymink_garp_frequencies()
+    taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
 # tree "growing"
 tree = Tree(newwick_tree)
@@ -35,12 +43,12 @@ tree_style.show_scale = False  # do not show scale
 
 
 # layout function
-def make_layout(mode, taxa_list):
+def make_layout():
     try:
         if mode == "normal":
             def layout(node):
                 if node.is_leaf():
-                    taxon = taxa_list[node.name]
+                    taxon = taxa_dict[node.name]
 
                     # if mode ==
                     face = BarChartFace(
@@ -55,7 +63,7 @@ def make_layout(mode, taxa_list):
         elif mode == "special":
             def layout(node):
                 if node.is_leaf():  # && node.name = "HONEYBEE":
-                    taxon = taxa_list[node.name]
+                    taxon = taxa_dict[node.name]
 
                     i = 1
                     for attr in [taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict]:
@@ -78,5 +86,4 @@ def make_layout(mode, taxa_list):
         sys.exit()
 
 # render tree
-tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=make_layout(mode, taxa_list))
-
+tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=make_layout())
