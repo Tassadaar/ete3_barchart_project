@@ -1,6 +1,7 @@
 from unittest import TestCase
 from TaxonHolder import Taxon
 
+
 class TestTaxon(TestCase):
     def test_calculate_all_amino_acid_frequencies(self):
         name = "test"

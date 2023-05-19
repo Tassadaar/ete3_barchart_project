@@ -42,6 +42,19 @@ tree_style = TreeStyle()
 tree_style.show_scale = False  # do not show scale
 
 
+def make_face(freq_dict):
+    face = BarChartFace(
+        values=list(freq_dict.values()),
+        labels=list(freq_dict.keys()),
+        colors=["blue" for key in freq_dict.keys()],
+        max_value=0.2,
+        width=100,
+        height=50
+    )
+
+    return face
+
+
 # layout function
 def make_layout():
     try:
@@ -49,32 +62,16 @@ def make_layout():
             def layout(node):
                 if node.is_leaf():
                     taxon = taxa_dict[node.name]
-
-                    # if mode ==
-                    face = BarChartFace(
-                        values=list(taxon.freq_dict.values()),
-                        labels=list(taxon.freq_dict.keys()),
-                        colors=["blue" for key in taxon.freq_dict.keys()],
-                        max_value=0.2,
-                        width=100,
-                        height=50
-                    )
+                    face = make_face(taxon.freq_dict)
                     faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
         elif mode == "special":
             def layout(node):
-                if node.is_leaf():  # && node.name = "HONEYBEE":
+                if node.is_leaf():
                     taxon = taxa_dict[node.name]
 
                     i = 1
-                    for attr in [taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict]:
-                        face = BarChartFace(
-                            values=list(attr.values()),
-                            labels=list(attr.keys()),
-                            colors=["blue" for key in attr.keys()],
-                            max_value=0.2,
-                            width=100,
-                            height=50
-                        )
+                    for freq_dict in [taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict]:
+                        face = make_face(freq_dict)
                         faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
                         i += 1
         else:
