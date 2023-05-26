@@ -30,7 +30,7 @@ file_format = args.format
 mode = args.mode
 
 try:
-    if mode == "normal" or mode == "special":
+    if mode == "normal" or mode == "special" or mode == "inverted":
         pass
     else:
         raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")
@@ -39,14 +39,26 @@ except ValueError as e:
     sys.exit()
 
 taxa_dict = {}  # dictionary to store taxa
+all_seq = ""  # string to hold all the sequences in the alignment
 
 # read in fasta and parse, then update
 for seq_record in SeqIO.parse(file_location, file_format):
     new_taxon = Taxon(seq_record.id, seq_record.seq)
+    all_seq += seq_record.seq
     new_taxon.calculate_all_amino_acid_frequencies()
     if mode == "special":
         new_taxon.calculate_fymink_garp_frequencies()
     taxa_dict[seq_record.id] = new_taxon  # get taxa dict
+
+if mode == "inverted":
+    all_seq = all_seq.replace("-", "")
+    all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
+    unsorted_avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
+    sorted_keys = sorted(unsorted_avg_freq_dict.keys())
+    sorted_avg_freq_dict = {key: unsorted_avg_freq_dict[key] for key in sorted_keys}
+
+    for name, taxon in taxa_dict.items():
+        taxon.calculate_freq_deviation(sorted_avg_freq_dict)
 
 # tree "growing"
 tree = Tree(newwick_tree)
@@ -88,6 +100,13 @@ def make_layout():
                     face = make_face(freq_dict)
                     faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
                     i += 1
+    elif mode == "inverted":
+        def layout(node):
+            if node.is_leaf():
+                taxon = taxa_dict[node.name]
+                face = make_face(taxon.all_freq_deviation_dict)
+                face.min_value = -0.2
+                faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
     else:
         raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")
 

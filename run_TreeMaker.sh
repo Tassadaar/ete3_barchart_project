@@ -2,6 +2,6 @@
 
 source activate treeProject
 
-python TreeMaker.py -t input_files/nematode_CH.tree -n input_files/nematode.fasta -f fasta -m sspecial
+python TreeMaker.py -t input_files/nematode_CH.tree -n input_files/nematode.fasta -f fasta -m inverted
 
 conda deactivate
