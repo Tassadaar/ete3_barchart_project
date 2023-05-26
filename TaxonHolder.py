@@ -1,5 +1,6 @@
 """
-This program implements a holder for taxon attributes: name, seq, amino acid content, percentages
+This program implements a holder for taxon attributes: name, seq, amino acid content, percentages, and the ability to
+calculate said attributes.
 """
 
 
@@ -15,7 +16,7 @@ class Taxon:
 
     def calculate_all_amino_acid_frequencies(self):
         all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
-        unsorted_freq_dict = {aa: self.seq.count(aa) / len(self.seq.replace("-","")) for aa in all_amino_acids}
+        unsorted_freq_dict = {aa: self.seq.count(aa) / len(self.seq.replace("-", "")) for aa in all_amino_acids}
         sorted_keys = sorted(unsorted_freq_dict.keys())
         sorted_dict = {key: unsorted_freq_dict[key] for key in sorted_keys}
 

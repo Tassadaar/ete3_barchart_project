@@ -1,5 +1,11 @@
 """
-This program makes a simple unrooted tree from a newwick string, and render said tree to PNG image.
+This program makes a simple unrooted tree from a newwick string, make BarChartFace for each leaf node in layout and
+render said tree to a PNG image.
+
+mandatory arguments: -t or --tree, newwick tree
+                     -n or --filename, path to alignment file
+                     -f or --format, format of said alignment file (only tested for fasta)
+optional arguments: -m or --mode, type of BarChartFace to load (all or fymink/garp subsets)
 """
 
 import argparse
