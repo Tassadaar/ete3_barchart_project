@@ -30,7 +30,7 @@ file_format = args.format
 mode = args.mode
 
 try:
-    if mode == "normal" or mode == "special" or mode == "inverted":
+    if mode == "normal" or mode == "special" or mode == "inverted" or mode == "fgInverted":
         pass
     else:
         raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")
@@ -50,15 +50,21 @@ for seq_record in SeqIO.parse(file_location, file_format):
         new_taxon.calculate_fymink_garp_frequencies()
     taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
-if mode == "inverted":
+if mode == "inverted" or mode == "fgInverted":
     all_seq = all_seq.replace("-", "")
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
     unsorted_avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
     sorted_keys = sorted(unsorted_avg_freq_dict.keys())
     sorted_avg_freq_dict = {key: unsorted_avg_freq_dict[key] for key in sorted_keys}
 
-    for name, taxon in taxa_dict.items():
-        taxon.calculate_freq_deviation(sorted_avg_freq_dict)
+    if mode == "inverted":
+        for name, taxon in taxa_dict.items():
+            taxon.calculate_freq_deviation(sorted_avg_freq_dict)
+
+    if mode == "fgInverted":
+        for name, taxon in taxa_dict.items():
+            taxon.calculate_fymink_garp_frequencies()
+            taxon.calculate_fymink_garp_deviation(sorted_avg_freq_dict)
 
 # tree "growing"
 tree = Tree(newwick_tree)
@@ -105,8 +111,25 @@ def make_layout():
             if node.is_leaf():
                 taxon = taxa_dict[node.name]
                 face = make_face(taxon.all_freq_deviation_dict)
-                face.min_value = -0.2
+                face.values = [abs(x) for x in taxon.all_freq_deviation_dict.values()]
+                face.colors = ["blue" if f > 0 else "red" for f in taxon.all_freq_deviation_dict.values()]
+                face.max_value = 0.05
                 faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
+    elif mode == "fgInverted":
+        def layout(node):
+            if node.is_leaf():
+                taxon = taxa_dict[node.name]
+
+                i = 1
+                for freq_dict in [taxon.fymink_freq_deviation_dict,
+                                  taxon.garp_freq_deviation_dict,
+                                  taxon.other_freq_deviation_dict]:
+                    face = make_face(freq_dict)
+                    face.values = [abs(x) for x in freq_dict.values()]
+                    face.colors = ["blue" if f > 0 else "red" for f in freq_dict.values()]
+                    face.max_value = 0.05
+                    faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
+                    i += 1
     else:
         raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")
 
