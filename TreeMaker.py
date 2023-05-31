@@ -73,67 +73,38 @@ tree_style = TreeStyle()
 tree_style.show_scale = False  # do not show scale
 
 
-def make_face(freq_dict):
-    face = BarChartFace(
-        values=list(freq_dict.values()),
-        labels=list(freq_dict.keys()),
-        colors=["blue" for key in freq_dict.keys()],
-        max_value=0.2,
-        width=100,
-        height=50
-    )
-
-    return face
-
-
 # layout function
-def make_layout():
-    if mode == "normal":
-        def layout(node):
-            if node.is_leaf():
-                taxon = taxa_dict[node.name]
-                face = make_face(taxon.freq_dict)
-                faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
+def layout(node):
+    if node.is_leaf():
+        taxon = taxa_dict[node.name]
+        dict_list = []
+        max_value = 0.2
+        if mode == "normal":
+            dict_list.append(taxon.freq_dict)
+        elif mode == "special":
+            dict_list.extend([taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict])
+        elif mode == "inverted":
+            dict_list.append(taxon.all_freq_deviation_dict)
+            max_value = 0.05
+        elif mode == "fgInverted":
+            dict_list.extend([taxon.fymink_freq_deviation_dict,
+                              taxon.garp_freq_deviation_dict,
+                              taxon.other_freq_deviation_dict])
+            max_value = 0.05
 
-    elif mode == "special":
-        def layout(node):
-            if node.is_leaf():
-                taxon = taxa_dict[node.name]
-
-                i = 1
-                for freq_dict in [taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict]:
-                    face = make_face(freq_dict)
-                    faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
-                    i += 1
-    elif mode == "inverted":
-        def layout(node):
-            if node.is_leaf():
-                taxon = taxa_dict[node.name]
-                face = make_face(taxon.all_freq_deviation_dict)
-                face.values = [abs(x) for x in taxon.all_freq_deviation_dict.values()]
-                face.colors = ["blue" if f > 0 else "red" for f in taxon.all_freq_deviation_dict.values()]
-                face.max_value = 0.05
-                faces.add_face_to_node(face=face, node=node, column=1, position="aligned")
-    elif mode == "fgInverted":
-        def layout(node):
-            if node.is_leaf():
-                taxon = taxa_dict[node.name]
-
-                i = 1
-                for freq_dict in [taxon.fymink_freq_deviation_dict,
-                                  taxon.garp_freq_deviation_dict,
-                                  taxon.other_freq_deviation_dict]:
-                    face = make_face(freq_dict)
-                    face.values = [abs(x) for x in freq_dict.values()]
-                    face.colors = ["blue" if f > 0 else "red" for f in freq_dict.values()]
-                    face.max_value = 0.05
-                    faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
-                    i += 1
-    else:
-        raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")
-
-    return layout
+        i = 1
+        for freq_dict in dict_list:
+            face = BarChartFace(
+                values=[abs(x) for x in freq_dict.values()],
+                labels=list(freq_dict.keys()),
+                colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
+                width=100,
+                height=50
+            )
+            face.max_value = max_value
+            faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
+            i += 1
 
 
 # render tree
-tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=make_layout())
+tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout)
