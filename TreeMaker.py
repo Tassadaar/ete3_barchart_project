@@ -29,8 +29,10 @@ file_location = args.filename
 file_format = args.format
 mode = args.mode
 
+modes = ["normal", "special", "inverted", "fgInverted"]
+
 try:
-    if mode == "normal" or mode == "special" or mode == "inverted" or mode == "fgInverted":
+    if mode in modes:
         pass
     else:
         raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")

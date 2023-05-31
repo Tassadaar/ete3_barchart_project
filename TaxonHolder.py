@@ -8,7 +8,7 @@ class Taxon:
 
     def __init__(self, name, seq):
         self.name = name
-        self.seq = seq
+        self.seq = seq.replace("-", "")
         self.freq_dict = {}
         self.fymink_freq_dict = {}
         self.garp_freq_dict = {}
@@ -20,11 +20,9 @@ class Taxon:
 
     def calculate_all_amino_acid_frequencies(self):
         all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
-        unsorted_freq_dict = {aa: self.seq.count(aa) / len(self.seq.replace("-", "")) for aa in all_amino_acids}
+        unsorted_freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in all_amino_acids}
         sorted_keys = sorted(unsorted_freq_dict.keys())
-        sorted_dict = {key: unsorted_freq_dict[key] for key in sorted_keys}
-
-        self.freq_dict = sorted_dict
+        self.freq_dict = {key: unsorted_freq_dict[key] for key in sorted_keys}
 
     def calculate_fymink_garp_frequencies(self):
 
