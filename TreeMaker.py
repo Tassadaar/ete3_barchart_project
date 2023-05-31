@@ -44,9 +44,9 @@ all_seq = ""  # string to hold all the sequences in the alignment
 for seq_record in SeqIO.parse(args.file, args.format):
     new_taxon = Taxon(seq_record.id, seq_record.seq)
     all_seq += seq_record.seq
-    new_taxon.calculate_all_amino_acid_frequencies()
+    new_taxon.set_all_amino_acid_frequencies()
     if mode == "special":
-        new_taxon.calculate_fymink_garp_frequencies()
+        new_taxon.set_fymink_garp_frequencies()
     taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
 if mode == "inverted" or mode == "fgInverted":
@@ -58,12 +58,12 @@ if mode == "inverted" or mode == "fgInverted":
 
     if mode == "inverted":
         for name, taxon in taxa_dict.items():
-            taxon.calculate_freq_deviation(sorted_avg_freq_dict)
+            taxon.set_frequency_deviations(sorted_avg_freq_dict)
 
     if mode == "fgInverted":
         for name, taxon in taxa_dict.items():
-            taxon.calculate_fymink_garp_frequencies()
-            taxon.calculate_fymink_garp_deviation(sorted_avg_freq_dict)
+            taxon.set_fymink_garp_frequencies()
+            taxon.set_fymink_garp_frequency_deviations(sorted_avg_freq_dict)
 
 # tree "growing"
 tree = Tree(args.tree)

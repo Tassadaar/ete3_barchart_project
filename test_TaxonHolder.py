@@ -8,7 +8,7 @@ class TestTaxon(TestCase):
         seq = "AACDEFFGHIKLMNPQRSTVWY"
 
         taxon = Taxon(name, seq)
-        taxon.calculate_all_amino_acid_frequencies()
+        taxon.set_all_amino_acid_frequencies()
 
         expected_fymink = {'F': 0.09090909090909091,
                            'I': 0.045454545454545456,

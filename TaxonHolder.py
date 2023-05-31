@@ -18,13 +18,13 @@ class Taxon:
         self.garp_freq_deviation_dict = {}
         self.other_freq_deviation_dict = {}
 
-    def calculate_all_amino_acid_frequencies(self):
+    def set_all_amino_acid_frequencies(self):
         all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
         unsorted_freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in all_amino_acids}
         sorted_keys = sorted(unsorted_freq_dict.keys())
         self.freq_dict = {key: unsorted_freq_dict[key] for key in sorted_keys}
 
-    def calculate_fymink_garp_frequencies(self):
+    def set_fymink_garp_frequencies(self):
 
         for key, value in self.freq_dict.items():
             if key in "FYMINK":
@@ -34,12 +34,12 @@ class Taxon:
             else:
                 self.other_freq_dict[key] = value
 
-    def calculate_freq_deviation(self, avg_freq_dict):
+    def set_frequency_deviations(self, avg_freq_dict):
 
         for aa, avg_freq in avg_freq_dict.items():
             self.all_freq_deviation_dict[aa] = self.freq_dict[aa] - avg_freq
 
-    def calculate_fymink_garp_deviation(self, avg_freq_dict):
+    def set_fymink_garp_frequency_deviations(self, avg_freq_dict):
 
         for aa, avg_freq in avg_freq_dict.items():
             if aa in "FYMINK":
