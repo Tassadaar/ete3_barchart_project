@@ -18,15 +18,12 @@ from ete3 import Tree, faces, TreeStyle, BarChartFace
 parser = argparse.ArgumentParser(description="Tree making")
 
 parser.add_argument("-t", "--tree", required=True)
-parser.add_argument("-n", "--filename", required=True)
+parser.add_argument("-n", "--file", required=True)
 parser.add_argument("-f", "--format", required=True)
 parser.add_argument("-m", "--mode", type=str, default="normal")
 
 args = parser.parse_args()
 
-newwick_tree = args.tree
-file_location = args.filename
-file_format = args.format
 mode = args.mode
 
 modes = ["normal", "special", "inverted", "fgInverted"]
@@ -44,7 +41,7 @@ taxa_dict = {}  # dictionary to store taxa
 all_seq = ""  # string to hold all the sequences in the alignment
 
 # read in fasta and parse, then update
-for seq_record in SeqIO.parse(file_location, file_format):
+for seq_record in SeqIO.parse(args.file, args.format):
     new_taxon = Taxon(seq_record.id, seq_record.seq)
     all_seq += seq_record.seq
     new_taxon.calculate_all_amino_acid_frequencies()
@@ -69,7 +66,7 @@ if mode == "inverted" or mode == "fgInverted":
             taxon.calculate_fymink_garp_deviation(sorted_avg_freq_dict)
 
 # tree "growing"
-tree = Tree(newwick_tree)
+tree = Tree(args.tree)
 
 # tree styling
 tree_style = TreeStyle()
