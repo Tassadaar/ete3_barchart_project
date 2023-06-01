@@ -52,8 +52,6 @@ for seq_record in SeqIO.parse(args.file, args.format):
     new_taxon = Taxon(seq_record.id, seq_record.seq)
     all_seq += seq_record.seq
     new_taxon.set_all_amino_acid_frequencies()
-    if subset == "fymink_garp":
-        new_taxon.set_fymink_garp_frequencies()
     taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
 # calculate relative frequencies if specified
@@ -65,11 +63,14 @@ if frequency_type == "relative":
     sorted_avg_freq_dict = {key: unsorted_avg_freq_dict[key] for key in sorted_keys}
 
     if subset == "none":
+
         for name, taxon in taxa_dict.items():
             taxon.set_frequency_deviations(sorted_avg_freq_dict)
 
     if subset == "fymink_garp":
+
         for name, taxon in taxa_dict.items():
+            taxon.set_fymink_garp_frequencies()
             taxon.set_fymink_garp_frequencies()
             taxon.set_fymink_garp_frequency_deviations(sorted_avg_freq_dict)
 
@@ -87,13 +88,17 @@ def layout(node):
         taxon = taxa_dict[node.name]
         dict_list = []
         max_value = 0.2
+
         if subset == "none":
+
             if frequency_type == "absolute":
                 dict_list.append(taxon.freq_dict)
             elif frequency_type == "relative":
                 dict_list.append(taxon.all_freq_deviation_dict)
                 max_value = 0.05
+
         elif subset == "fymink_garp":
+
             if frequency_type == "absolute":
                 dict_list.extend([taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict])
             elif frequency_type == "relative":
