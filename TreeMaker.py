@@ -20,19 +20,26 @@ parser = argparse.ArgumentParser(description="Tree making")
 parser.add_argument("-t", "--tree", required=True)
 parser.add_argument("-n", "--file", required=True)
 parser.add_argument("-f", "--format", required=True)
-parser.add_argument("-m", "--mode", type=str, default="normal")
+parser.add_argument("-s", "--subset", type=str, default="none")
+parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
 
 args = parser.parse_args()
 
-mode = args.mode
+subset = args.subset
+frequency_type = args.frequency_type
 
-modes = ["normal", "special", "inverted", "fgInverted"]
+subsets = ["none", "fymink_garp"]
+frequency_types = ["absolute", "relative"]
 
 try:
-    if mode in modes:
+    if subset in subsets:
         pass
     else:
-        raise ValueError("Invalid tag value for mode, make sure to check the list of valid tags and check spelling!")
+        raise ValueError("Invalid tag for subset, make sure to check the list of valid tags and spelling!")
+    if frequency_type in frequency_types:
+        pass
+    else:
+        raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
 except ValueError as e:
     print(f"Error: {e}")
     sys.exit()
@@ -45,22 +52,23 @@ for seq_record in SeqIO.parse(args.file, args.format):
     new_taxon = Taxon(seq_record.id, seq_record.seq)
     all_seq += seq_record.seq
     new_taxon.set_all_amino_acid_frequencies()
-    if mode == "special":
+    if subset == "fymink_garp":
         new_taxon.set_fymink_garp_frequencies()
     taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
-if mode == "inverted" or mode == "fgInverted":
+# calculate relative frequencies if specified
+if frequency_type == "relative":
     all_seq = all_seq.replace("-", "")
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
     unsorted_avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
     sorted_keys = sorted(unsorted_avg_freq_dict.keys())
     sorted_avg_freq_dict = {key: unsorted_avg_freq_dict[key] for key in sorted_keys}
 
-    if mode == "inverted":
+    if subset == "none":
         for name, taxon in taxa_dict.items():
             taxon.set_frequency_deviations(sorted_avg_freq_dict)
 
-    if mode == "fgInverted":
+    if subset == "fymink_garp":
         for name, taxon in taxa_dict.items():
             taxon.set_fymink_garp_frequencies()
             taxon.set_fymink_garp_frequency_deviations(sorted_avg_freq_dict)
@@ -79,18 +87,20 @@ def layout(node):
         taxon = taxa_dict[node.name]
         dict_list = []
         max_value = 0.2
-        if mode == "normal":
-            dict_list.append(taxon.freq_dict)
-        elif mode == "special":
-            dict_list.extend([taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict])
-        elif mode == "inverted":
-            dict_list.append(taxon.all_freq_deviation_dict)
-            max_value = 0.05
-        elif mode == "fgInverted":
-            dict_list.extend([taxon.fymink_freq_deviation_dict,
-                              taxon.garp_freq_deviation_dict,
-                              taxon.other_freq_deviation_dict])
-            max_value = 0.05
+        if subset == "none":
+            if frequency_type == "absolute":
+                dict_list.append(taxon.freq_dict)
+            elif frequency_type == "relative":
+                dict_list.append(taxon.all_freq_deviation_dict)
+                max_value = 0.05
+        elif subset == "fymink_garp":
+            if frequency_type == "absolute":
+                dict_list.extend([taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict])
+            elif frequency_type == "relative":
+                dict_list.extend([taxon.fymink_freq_deviation_dict,
+                                  taxon.garp_freq_deviation_dict,
+                                  taxon.other_freq_deviation_dict])
+                max_value = 0.05
 
         i = 1
         for freq_dict in dict_list:
