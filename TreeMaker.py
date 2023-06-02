@@ -51,7 +51,7 @@ all_seq = ""  # string to hold all the sequences in the alignment
 for seq_record in SeqIO.parse(args.file, args.format):
     new_taxon = Taxon(seq_record.id, seq_record.seq)
     all_seq += seq_record.seq
-    new_taxon.set_all_amino_acid_frequencies()
+    new_taxon.set_aa_freq()
     taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
 # calculate relative frequencies if specified
@@ -65,14 +65,13 @@ if frequency_type == "relative":
     if subset == "none":
 
         for name, taxon in taxa_dict.items():
-            taxon.set_frequency_deviations(sorted_avg_freq_dict)
+            taxon.set_freq_deviation(sorted_avg_freq_dict)
 
     if subset == "fymink_garp":
 
         for name, taxon in taxa_dict.items():
-            taxon.set_fymink_garp_frequencies()
-            taxon.set_fymink_garp_frequencies()
-            taxon.set_fymink_garp_frequency_deviations(sorted_avg_freq_dict)
+            taxon.set_fg_freq()
+            taxon.set_fg_freq_deviation(sorted_avg_freq_dict)
 
 # tree "growing"
 tree = Tree(args.tree)
