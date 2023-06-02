@@ -11,7 +11,7 @@ optional arguments: -m or --mode, type of BarChartFace to load (all or fymink/ga
 import argparse
 import sys
 from Bio import SeqIO
-from TaxonHolder import Taxon
+import Taxon
 from ete3 import Tree, faces, TreeStyle, BarChartFace
 
 # specify tags
