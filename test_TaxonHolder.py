@@ -1,5 +1,5 @@
 from unittest import TestCase
-from TaxonHolder import Taxon
+from Taxon import Taxon
 
 
 class TestTaxon(TestCase):
@@ -8,7 +8,7 @@ class TestTaxon(TestCase):
         seq = "AACDEFFGHIKLMNPQRSTVWY"
 
         taxon = Taxon(name, seq)
-        taxon.set_aa_freq()
+        taxon.set_aa_abs_freq()
 
         expected_fymink = {'F': 0.09090909090909091,
                            'I': 0.045454545454545456,

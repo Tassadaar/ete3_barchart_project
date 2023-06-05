@@ -52,7 +52,7 @@ all_seq = ""  # string to hold all the sequences in the alignment
 for seq_record in SeqIO.parse(args.file, args.format):
     new_taxon = Taxon(seq_record.id, seq_record.seq)
     all_seq += seq_record.seq
-    new_taxon.set_aa_freq()
+    new_taxon.set_aa_abs_freq()
     taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
 # calculate relative frequencies if specified
@@ -61,17 +61,6 @@ if frequency_type == "relative":
     all_seq = all_seq.replace("-", "")
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
     avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
-
-    if subset == "none":
-
-        for name, taxon in taxa_dict.items():
-            taxon.set_freq_deviation(avg_freq_dict)
-
-    if subset == "fymink_garp":
-
-        for name, taxon in taxa_dict.items():
-            taxon.set_fg_freq()
-            taxon.set_fg_freq_deviation(avg_freq_dict)
 
 # tree "growing"
 tree = Tree(args.tree)
@@ -93,17 +82,16 @@ def layout(node):
             if frequency_type == "absolute":
                 dict_list.append(taxon.freq_dict)
             elif frequency_type == "relative":
-                dict_list.append(taxon.all_freq_deviation_dict)
+                dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
                 max_value = 0.05
 
         elif subset == "fymink_garp":
+            taxon.set_fg_abs_freq()
 
             if frequency_type == "absolute":
-                dict_list.extend([taxon.fymink_freq_dict, taxon.garp_freq_dict, taxon.other_freq_dict])
+                dict_list = taxon.get_fg_abs_freq()
             elif frequency_type == "relative":
-                dict_list.extend([taxon.fymink_freq_deviation_dict,
-                                  taxon.garp_freq_deviation_dict,
-                                  taxon.other_freq_deviation_dict])
+                dict_list = taxon.get_fg_relative_freq(avg_freq_dict)
                 max_value = 0.05
 
         i = 1
