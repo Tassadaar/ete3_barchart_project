@@ -56,6 +56,7 @@ for seq_record in SeqIO.parse(args.file, args.format):
 
 # calculate relative frequencies if specified
 if frequency_type == "relative":
+    # calculate average frequency
     all_seq = all_seq.replace("-", "")
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
     avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}

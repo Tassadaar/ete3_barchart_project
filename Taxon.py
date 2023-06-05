@@ -19,10 +19,9 @@ class Taxon:
         self.other_freq_deviation_dict = {}
 
     def set_aa_freq(self):
+        sorted_seq = sorted(self.seq)  # sort the sequence string alphabetically to ensure matching printing order
         all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
-        unsorted_freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in all_amino_acids}
-        sorted_keys = sorted(unsorted_freq_dict.keys())
-        self.freq_dict = {key: unsorted_freq_dict[key] for key in sorted_keys}
+        self.freq_dict = {aa: sorted_seq.count(aa) / len(self.seq) for aa in all_amino_acids}  # absolute frequencies
 
     def set_fg_freq(self):
 
