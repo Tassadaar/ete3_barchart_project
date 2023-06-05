@@ -20,6 +20,7 @@ parser = argparse.ArgumentParser(description="Tree making")
 parser.add_argument("-t", "--tree", required=True)
 parser.add_argument("-n", "--file", required=True)
 parser.add_argument("-f", "--format", required=True)
+parser.add_argument("-o", "--output", type=str, default="barchart_tree")
 parser.add_argument("-s", "--subset", type=str, default="none")
 parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
 
@@ -120,4 +121,4 @@ def layout(node):
 
 
 # render tree
-tree.render("test.png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout)
+tree.render(args.output + ".png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout)
