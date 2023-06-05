@@ -14,9 +14,12 @@ class Taxon:
         self.garp_freq_dict = {}
         self.other_freq_dict = {}
 
+    # absolute frequencies
     def set_aa_abs_freq(self):
-        all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
-        self.freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in all_amino_acids}  # absolute frequencies
+        self.freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in "ACDEFGHIKLMNPQRSTVWY"}
+
+    def get_all_relative_freq(self, avg_freq_dict):
+        return {aa: self.freq_dict[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
 
     def set_fg_abs_freq(self):
 
@@ -30,14 +33,6 @@ class Taxon:
 
     def get_fg_abs_freq(self):
         return [self.fymink_freq_dict, self.garp_freq_dict, self.other_freq_dict]
-
-    def get_all_relative_freq(self, avg_freq_dict):
-        relative_freq_dict = {}
-
-        for aa, avg_freq in avg_freq_dict.items():
-            relative_freq_dict[aa] = self.freq_dict[aa] - avg_freq
-
-        return relative_freq_dict
 
     def get_fg_relative_freq(self, avg_freq_dict):
         fymink_relative_freq_dict = {}
