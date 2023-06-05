@@ -80,7 +80,7 @@ def layout(node):
         if subset == "none":
 
             if frequency_type == "absolute":
-                dict_list.append(taxon.freq_dict)
+                dict_list.append(taxon.get_aa_abs_freq())
             elif frequency_type == "relative":
                 dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
                 max_value = 0.05
