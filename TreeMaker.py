@@ -58,20 +58,18 @@ for seq_record in SeqIO.parse(args.file, args.format):
 if frequency_type == "relative":
     all_seq = all_seq.replace("-", "")
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
-    unsorted_avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
-    sorted_keys = sorted(unsorted_avg_freq_dict.keys())
-    sorted_avg_freq_dict = {key: unsorted_avg_freq_dict[key] for key in sorted_keys}
+    avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
     if subset == "none":
 
         for name, taxon in taxa_dict.items():
-            taxon.set_freq_deviation(sorted_avg_freq_dict)
+            taxon.set_freq_deviation(avg_freq_dict)
 
     if subset == "fymink_garp":
 
         for name, taxon in taxa_dict.items():
             taxon.set_fg_freq()
-            taxon.set_fg_freq_deviation(sorted_avg_freq_dict)
+            taxon.set_fg_freq_deviation(avg_freq_dict)
 
 # tree "growing"
 tree = Tree(args.tree)
