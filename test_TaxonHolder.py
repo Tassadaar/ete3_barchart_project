@@ -21,5 +21,5 @@ class TestTaxon(TestCase):
                          'P': 0.045454545454545456,
                          'R': 0.045454545454545456}
 
-        self.assertEqual(taxon.fymink_freq_dict, expected_fymink)
-        self.assertEqual(taxon.garp_freq_dict, expected_garp)
+        self.assertEqual(taxon.group1_freq, expected_fymink)
+        self.assertEqual(taxon.group2_freq, expected_garp)

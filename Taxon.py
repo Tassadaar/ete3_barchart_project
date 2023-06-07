@@ -9,9 +9,9 @@ class Taxon:
         self.name = name
         self.seq = seq.replace("-", "")
         self.freq_dict = {}
-        self.fymink_freq_dict = {}
-        self.garp_freq_dict = {}
-        self.other_freq_dict = {}
+        self.group1_freq = {}
+        self.group2_freq = {}
+        self.other_freq = {}
 
     # absolute frequencies
     def set_aa_abs_freq(self):
@@ -23,33 +23,33 @@ class Taxon:
     def get_all_relative_freq(self, avg_freq_dict):
         return {aa: self.freq_dict[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
 
-    def set_fg_abs_freq(self):
+    def set_subset_abs_freq(self, subsets):
 
         for key, value in self.freq_dict.items():
-            if key in "FYMINK":
-                self.fymink_freq_dict[key] = value
-            elif key in "GARP":
-                self.garp_freq_dict[key] = value
+            if key in subsets[0]:
+                self.group1_freq[key] = value
+            elif key in subsets[1]:
+                self.group2_freq[key] = value
             else:
-                self.other_freq_dict[key] = value
+                self.other_freq[key] = value
 
-    def get_fg_abs_freq(self):
-        return [self.fymink_freq_dict, self.garp_freq_dict, self.other_freq_dict]
+    def get_subset_abs_freq(self):
+        return [self.group1_freq, self.group2_freq, self.other_freq]
 
-    def get_fg_relative_freq(self, avg_freq_dict):
-        fymink_relative_freq_dict = {}
-        garp_relative_freq_dict = {}
-        other_relative_freq_dict = {}
+    def get_subset_relative_freq(self, subsets, avg_freq_dict):
+        group1_rel_freq = {}
+        group2_rel_freq = {}
+        other_rel_freq = {}
 
         for aa, avg_freq in avg_freq_dict.items():
-            if aa in "FYMINK":
-                fymink_relative_freq_dict[aa] = self.fymink_freq_dict[aa] - avg_freq
-            elif aa in "GARP":
-                garp_relative_freq_dict[aa] = self.garp_freq_dict[aa] - avg_freq
+            if aa in subsets[0]:
+                group1_rel_freq[aa] = self.group1_freq[aa] - avg_freq
+            elif aa in subsets[1]:
+                group2_rel_freq[aa] = self.group2_freq[aa] - avg_freq
             else:
-                other_relative_freq_dict[aa] = self.other_freq_dict[aa] - avg_freq
+                other_rel_freq[aa] = self.other_freq[aa] - avg_freq
 
-        return [fymink_relative_freq_dict, garp_relative_freq_dict, other_relative_freq_dict]
+        return [group1_rel_freq, group2_rel_freq, other_rel_freq]
 
     def __str__(self):
-        return f"{self.name}\n{self.fymink_freq_dict}\n{self.garp_freq_dict}\n"
+        return f"{self.name}\n{self.group1_freq}\n{self.group2_freq}\n"

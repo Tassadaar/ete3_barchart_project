@@ -29,11 +29,11 @@ args = parser.parse_args()
 subset = args.subset
 frequency_type = args.frequency_type
 
-subsets = ["none", "fymink_garp"]
+subsets = [word.upper() for word in subset.split("_") ]  # a list assumed to have two items
 frequency_types = ["absolute", "relative"]
 
 try:
-    if subset in subsets:
+    if 1 == 1:  # this condition will need to be fixed, it is currently not validating input
         pass
     else:
         raise ValueError("Invalid tag for subset, make sure to check the list of valid tags and spelling!")
@@ -85,13 +85,13 @@ def layout(node):
                 dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
                 max_value = 0.05
 
-        elif subset == "fymink_garp":
-            taxon.set_fg_abs_freq()
+        else:
+            taxon.set_subset_abs_freq(subsets)
 
             if frequency_type == "absolute":
-                dict_list = taxon.get_fg_abs_freq()
+                dict_list = taxon.get_subset_abs_freq()
             elif frequency_type == "relative":
-                dict_list = taxon.get_fg_relative_freq(avg_freq_dict)
+                dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
                 max_value = 0.05
 
         i = 1
