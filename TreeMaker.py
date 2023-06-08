@@ -29,17 +29,18 @@ args = parser.parse_args()
 subset = args.subset
 frequency_type = args.frequency_type
 
-subsets = [word.upper() for word in subset.split("_") ]  # a list assumed to have two items
+subsets = [word.upper() for word in subset.split(",")]  # a list assumed to have two items
 frequency_types = ["absolute", "relative"]
 
+all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
+
 try:
-    if 1 == 1:  # this condition will need to be fixed, it is currently not validating input
-        pass
-    else:
-        raise ValueError("Invalid tag for subset, make sure to check the list of valid tags and spelling!")
-    if frequency_type in frequency_types:
-        pass
-    else:
+    if len(subsets) != 2:
+        raise ValueError("Subsets contain less or more than 2 groupings, make sure to check format!")
+    for subset in subsets:
+        if not set(subset).issubset(set(all_amino_acids)):
+            raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
+    if frequency_type not in frequency_types:
         raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
 except ValueError as e:
     print(f"Error: {e}")
@@ -59,7 +60,6 @@ for seq_record in SeqIO.parse(args.file, args.format):
 if frequency_type == "relative":
     # calculate average frequency
     all_seq = all_seq.replace("-", "")
-    all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
     avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
 # tree "growing"
