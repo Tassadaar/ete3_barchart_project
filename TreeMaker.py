@@ -25,21 +25,19 @@ def main():
     parser.add_argument("-o", "--output", type=str, default="barchart_tree")
     parser.add_argument("-s", "--subset", type=str, default="none")
     parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
-    parser.add_argument("-g", "--outgroup", type=str, default="none")
+    parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
 
     args = parser.parse_args()
 
     # tree "growing"
     tree = Tree(args.tree)
+    outgroup_reps = [word.upper() for word in args.outgroup_reps.split(",")]
     subset = args.subset
     frequency_type = args.frequency_type
-    outgroup = args.outgroup
 
     subsets = [word.upper() for word in subset.split(",")]  # a list assumed to have two items
     frequency_types = ["absolute", "relative"]
-
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
-
     try:
         if len(subsets) != 2:
             raise ValueError("Subsets contain less or more than 2 groupings, make sure to check format!")
@@ -48,8 +46,9 @@ def main():
                 raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
         if frequency_type not in frequency_types:
             raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
-        if outgroup != "none" and outgroup not in tree.get_leaf_names():
-            raise ValueError("Invalid outgroup, make sure to check spelling!")
+        if outgroup_reps[0] != "NONE":
+            if outgroup_reps[0] not in tree.get_leaf_names() or outgroup_reps[1] not in tree.get_leaf_names():
+                raise ValueError("Invalid outgroup, make sure to check spelling!")
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit()
@@ -71,7 +70,16 @@ def main():
         avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
     # tree rooting
-    tree.set_outgroup(outgroup)
+    if outgroup_reps[0] != "NONE":
+        common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
+        if common_ancestor.is_root():
+            for leaf in tree.get_leaf_names():
+                if leaf not in outgroup_reps:
+                    tree.set_outgroup(leaf)
+                    common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
+                    break
+
+        tree.set_outgroup(common_ancestor)
 
     # tree styling
     tree_style = TreeStyle()

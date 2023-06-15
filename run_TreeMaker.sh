@@ -7,6 +7,6 @@ python TreeMaker.py \
   -n input_files/nematode.fasta \
   -f fasta -m relative \
   -s fymink,garp \
-  -g ALLOMYCES
+  -g honeybee,nematode
 
 conda deactivate
