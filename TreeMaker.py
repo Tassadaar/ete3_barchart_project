@@ -25,11 +25,15 @@ def main():
     parser.add_argument("-o", "--output", type=str, default="barchart_tree")
     parser.add_argument("-s", "--subset", type=str, default="none")
     parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
+    parser.add_argument("-g", "--outgroup", type=str, default="none")
 
     args = parser.parse_args()
 
+    # tree "growing"
+    tree = Tree(args.tree)
     subset = args.subset
     frequency_type = args.frequency_type
+    outgroup = args.outgroup
 
     subsets = [word.upper() for word in subset.split(",")]  # a list assumed to have two items
     frequency_types = ["absolute", "relative"]
@@ -44,6 +48,8 @@ def main():
                 raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
         if frequency_type not in frequency_types:
             raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
+        if outgroup != "none" and outgroup not in tree.get_leaf_names():
+            raise ValueError("Invalid outgroup, make sure to check spelling!")
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit()
@@ -64,13 +70,12 @@ def main():
         all_seq = all_seq.replace("-", "")
         avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
-    # tree "growing"
-    tree = Tree(args.tree)
+    # tree rooting
+    tree.set_outgroup(outgroup)
 
     # tree styling
     tree_style = TreeStyle()
     tree_style.show_scale = False  # do not show scale
-
 
     # layout function
     def layout(node):
@@ -111,3 +116,7 @@ def main():
 
     # render tree
     tree.render(args.output + ".png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout)
+
+
+if __name__ == "__main__":
+    main()
