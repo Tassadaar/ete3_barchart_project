@@ -29,8 +29,7 @@ def main():
 
     args = parser.parse_args()
 
-    # tree "growing"
-    tree = Tree(args.tree)
+    tree = Tree(args.tree)  # tree "growing"
     outgroup_reps = [word.upper() for word in args.outgroup_reps.split(",")]
     subset = args.subset
     frequency_type = args.frequency_type
@@ -38,20 +37,36 @@ def main():
     subsets = [word.upper() for word in subset.split(",")]  # a list assumed to have two items
     frequency_types = ["absolute", "relative"]
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
+
+    # exception handling for flags
     try:
+        # check if subset is in the right format and if it contains valid amino acids
         if len(subsets) != 2:
             raise ValueError("Subsets contain less or more than 2 groupings, make sure to check format!")
+
         for subset in subsets:
+
             if not set(subset).issubset(set(all_amino_acids)):
                 raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
+
+        # check if frequency_type is valid
         if frequency_type not in frequency_types:
             raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
+
+        # check if the provided outgroup is valid
         if outgroup_reps[0] != "NONE":
-            if outgroup_reps[0] not in tree.get_leaf_names() or outgroup_reps[1] not in tree.get_leaf_names():
+
+            if outgroup_reps[0] not in tree.get_leaf_names():
                 raise ValueError("Invalid outgroup, make sure to check spelling!")
+
+            elif len(outgroup_reps) > 1:
+
+                if outgroup_reps[1] not in tree.get_leaf_names():
+                    raise ValueError("Invalid outgroup, make sure to check spelling!")
+
     except ValueError as e:
-        print(f"Error: {e}")
-        sys.exit()
+        print(f"Error: {e}")  # print error message
+        sys.exit()  # terminate the program
 
     taxa_dict = {}  # dictionary to store taxa
     all_seq = ""  # string to hold all the sequences in the alignment
@@ -70,18 +85,29 @@ def main():
         avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
     # tree rooting
-    if outgroup_reps[0] != "NONE":
-        common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
-        if common_ancestor.is_root():
-            for leaf in tree.get_leaf_names():
-                if leaf not in outgroup_reps:
-                    tree.set_outgroup(leaf)
-                    common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
-                    break
+    if outgroup_reps[0] != "NONE":  # check if rooting is required
 
-        tree.set_outgroup(common_ancestor)
+        if len(outgroup_reps) > 1:  # check if the outgroup is only one taxon
+            # if not, make it monophyletic
+            common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
+
+            # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current root
+            if common_ancestor.is_root():
+
+                # find a random ingroup taxon for rooting
+                for leaf in tree.get_leaf_names():
+
+                    if leaf not in outgroup_reps:
+                        tree.set_outgroup(leaf)
+                        common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
+                        break
+
+            tree.set_outgroup(common_ancestor)
+        else:
+            tree.set_outgroup(outgroup_reps[0])
 
     # tree styling
+    tree.ladderize()
     tree_style = TreeStyle()
     tree_style.show_scale = False  # do not show scale
 
