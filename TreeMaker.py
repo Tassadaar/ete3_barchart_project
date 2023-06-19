@@ -86,25 +86,7 @@ def main():
 
     # tree rooting
     if outgroup_reps[0] != "NONE":  # check if rooting is required
-
-        if len(outgroup_reps) > 1:  # check if the outgroup is only one taxon
-            # if not, make it monophyletic
-            common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
-
-            # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current root
-            if common_ancestor.is_root():
-
-                # find a random ingroup taxon for rooting
-                for leaf in tree.get_leaf_names():
-
-                    if leaf not in outgroup_reps:
-                        tree.set_outgroup(leaf)
-                        common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
-                        break
-
-            tree.set_outgroup(common_ancestor)
-        else:
-            tree.set_outgroup(outgroup_reps[0])
+        tree = root(tree, outgroup_reps)
 
     # tree styling
     tree.ladderize()
@@ -150,6 +132,47 @@ def main():
 
     # render tree
     tree.render(args.output + ".png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout)
+
+
+def root(tree, outgroup_reps):
+
+    if len(outgroup_reps) > 1:  # check if the outgroup is only one taxon
+        # if not, make it monophyletic
+        common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
+        children = common_ancestor.get_children()
+
+        # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current "root"
+        if common_ancestor.is_root():
+            fringe_case = True
+
+            # find the first ingroup taxon for rooting
+            for child in children:
+                leaves = child.get_leaf_names()
+
+                if all(rep not in leaves for rep in outgroup_reps):
+                    tree.set_outgroup(leaves[0])
+                    common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
+                    fringe_case = False
+                    break
+
+            # if all immediate children of the root contains an outgroup taxon
+            while fringe_case:
+                ingroup = input("Enter a leaf of the ingroup: ")
+
+                if type(ingroup) != str:
+                    print("Invalid ingroup, please input a string!")
+                elif ingroup in common_ancestor.get_leaf_names() and ingroup not in outgroup_reps:
+                    tree.set_outgroup(ingroup)
+                    common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
+                    break
+                else:
+                    print("Invalid ingroup, check spelling!")
+
+        tree.set_outgroup(common_ancestor)
+    else:
+        tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup
+
+    return tree
 
 
 if __name__ == "__main__":
