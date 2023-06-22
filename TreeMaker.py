@@ -139,7 +139,6 @@ def main():
 
 
 def root(tree, outgroup_reps):
-
     if len(outgroup_reps) > 1:  # check if the outgroup is only one taxon
         # if not, make it monophyletic
         common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
@@ -164,9 +163,7 @@ def root(tree, outgroup_reps):
             while fringe_case:
                 ingroup = input("Enter a leaf of the ingroup: ")
 
-                if type(ingroup) != str:
-                    print("Invalid ingroup, please input a string!")
-                elif ingroup in common_ancestor.get_leaf_names() and ingroup not in outgroup_reps:
+                if ingroup in common_ancestor.get_leaf_names() and ingroup not in outgroup_reps:
                     tree.set_outgroup(ingroup)
                     common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
                     break
@@ -178,7 +175,6 @@ def root(tree, outgroup_reps):
         tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup
 
     return tree
-
 
 if __name__ == "__main__":
     main()
