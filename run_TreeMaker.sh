@@ -3,10 +3,9 @@
 source activate treeProject
 
 python TreeMaker.py \
-  -t input_files/nematode_CH.tree \
-  -n input_files/nematode.fasta \
+  -t input_files/1st_scenario.tree \
+  -n input_files/toy.fasta \
   -f fasta -m relative \
-  -s fymink,garp \
-  -g honeybee,nematode
+  -s fymink,garp
 
 conda deactivate

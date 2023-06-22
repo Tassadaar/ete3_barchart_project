@@ -88,6 +88,10 @@ def main():
     if outgroup_reps[0] != "NONE":  # check if rooting is required
         tree = root(tree, outgroup_reps)
 
+    # experiments
+    tree = root(tree, ["NEMATODE", "LOCUST"])
+    tree.get_tree_root().unroot()
+
     # tree styling
     tree.ladderize()
     tree_style = TreeStyle()
@@ -143,6 +147,7 @@ def root(tree, outgroup_reps):
 
         # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current "root"
         if common_ancestor.is_root():
+            print("Common ancestor is root, taking a detour")
             fringe_case = True
 
             # find the first ingroup taxon for rooting
