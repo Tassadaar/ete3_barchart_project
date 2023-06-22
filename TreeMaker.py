@@ -22,7 +22,7 @@ def main():
     parser.add_argument("-t", "--tree", required=True)
     parser.add_argument("-n", "--file", required=True)
     parser.add_argument("-f", "--format", required=True)
-    parser.add_argument("-o", "--output", type=str, default="barchart_tree")
+    parser.add_argument("-o", "--output", type=str, default="tree")
     parser.add_argument("-s", "--subset", type=str, default="none")
     parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
     parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
