@@ -88,10 +88,6 @@ def main():
     if outgroup_reps[0] != "NONE":  # check if rooting is required
         tree = root(tree, outgroup_reps)
 
-    # experiments
-    tree = root(tree, ["NEMATODE", "LOCUST"])
-    tree.get_tree_root().unroot()
-
     # tree styling
     tree.ladderize()
     tree_style = TreeStyle()
@@ -139,42 +135,31 @@ def main():
 
 
 def root(tree, outgroup_reps):
-    if len(outgroup_reps) > 1:  # check if the outgroup is only one taxon
-        # if not, make it monophyletic
-        common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
-        children = common_ancestor.get_children()
-
-        # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current "root"
-        if common_ancestor.is_root():
-            print("Common ancestor is root, taking a detour")
-            fringe_case = True
-
-            # find the first ingroup taxon for rooting
-            for child in children:
-                leaves = child.get_leaf_names()
-
-                if all(rep not in leaves for rep in outgroup_reps):
-                    tree.set_outgroup(leaves[0])
-                    common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
-                    fringe_case = False
-                    break
-
-            # if all immediate children of the root contains an outgroup taxon
-            while fringe_case:
-                ingroup = input("Enter a leaf of the ingroup: ")
-
-                if ingroup in common_ancestor.get_leaf_names() and ingroup not in outgroup_reps:
-                    tree.set_outgroup(ingroup)
-                    common_ancestor = tree.get_common_ancestor(outgroup_reps[0], outgroup_reps[1])
-                    break
-                else:
-                    print("Invalid ingroup, check spelling!")
-
-        tree.set_outgroup(common_ancestor)
-    else:
+    if len(outgroup_reps) == 1:  # check if the outgroup is only one taxon
         tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup
+    elif len(outgroup_reps) > 1:  # if not, make it monophyletic
+        common_ancestor = tree.get_common_ancestor(*outgroup_reps)
+
+        if not common_ancestor.is_root():
+            tree.set_outgroup(common_ancestor)
+        else:  # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current "root"
+            print("\nCommon ancestor is root, taking a detour")
+            ingroup = input("\nEnter an ingroup taxon: ").upper()
+
+            while ingroup not in tree.get_leaf_names():
+                print("You entered a taxon that is not a part of the tree, check spelling!")
+                ingroup = input("\nEnter an ingroup taxon: ").upper()
+
+            while ingroup in outgroup_reps:
+                print("You entered an outgroup taxon, check spelling!")
+                ingroup = input("\nEnter an ingroup taxon: ").upper()
+
+            tree.set_outgroup(ingroup)
+            common_ancestor = tree.get_common_ancestor(*outgroup_reps)
+            tree.set_outgroup(common_ancestor)
 
     return tree
+
 
 if __name__ == "__main__":
     main()
