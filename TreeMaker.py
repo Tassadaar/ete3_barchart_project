@@ -134,11 +134,13 @@ def main():
     tree.render(args.output + ".png", units="px", h=2000, w=2500, dpi=70,  tree_style=tree_style, layout=layout)
 
 
+# if user specified outgroup taxa in the flags then root accordingly
 def root(tree, outgroup_reps):
 
     # check if the outgroup is only one taxon
     if len(outgroup_reps) == 1:
         tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup
+
         return tree
 
     # if not, make it monophyletic
@@ -146,23 +148,28 @@ def root(tree, outgroup_reps):
 
     if not common_ancestor.is_root():
         tree.set_outgroup(common_ancestor)
+
         return tree
 
     # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current "root"
+    # the user needs to provide a proper ingroup based on biological information
     print("\nCommon ancestor is root, taking a detour")
     ingroup = input("\nEnter an ingroup taxon: ")
 
+    # reject non-leaf inputs
     while ingroup not in tree.get_leaf_names():
         print("You entered a taxon that is not a part of the tree, check spelling!")
         ingroup = input("\nEnter an ingroup taxon: ")
 
+    # reject outgroup inputs
     while ingroup in outgroup_reps:
         print("You entered an outgroup taxon, check spelling!")
         ingroup = input("\nEnter an ingroup taxon: ")
 
     tree.set_outgroup(ingroup)
-    common_ancestor = tree.get_common_ancestor(*outgroup_reps)
+    common_ancestor = tree.get_common_ancestor(*outgroup_reps)  # get the desired monophyletic outgroup
     tree.set_outgroup(common_ancestor)
+
     return tree
 
 
