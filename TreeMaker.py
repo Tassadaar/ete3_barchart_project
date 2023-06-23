@@ -135,29 +135,34 @@ def main():
 
 
 def root(tree, outgroup_reps):
-    if len(outgroup_reps) == 1:  # check if the outgroup is only one taxon
+
+    # check if the outgroup is only one taxon
+    if len(outgroup_reps) == 1:
         tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup
-    elif len(outgroup_reps) > 1:  # if not, make it monophyletic
-        common_ancestor = tree.get_common_ancestor(*outgroup_reps)
+        return tree
 
-        if not common_ancestor.is_root():
-            tree.set_outgroup(common_ancestor)
-        else:  # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current "root"
-            print("\nCommon ancestor is root, taking a detour")
-            ingroup = input("\nEnter an ingroup taxon: ").upper()
+    # if not, make it monophyletic
+    common_ancestor = tree.get_common_ancestor(*outgroup_reps)
 
-            while ingroup not in tree.get_leaf_names():
-                print("You entered a taxon that is not a part of the tree, check spelling!")
-                ingroup = input("\nEnter an ingroup taxon: ").upper()
+    if not common_ancestor.is_root():
+        tree.set_outgroup(common_ancestor)
+        return tree
 
-            while ingroup in outgroup_reps:
-                print("You entered an outgroup taxon, check spelling!")
-                ingroup = input("\nEnter an ingroup taxon: ").upper()
+    # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current "root"
+    print("\nCommon ancestor is root, taking a detour")
+    ingroup = input("\nEnter an ingroup taxon: ")
 
-            tree.set_outgroup(ingroup)
-            common_ancestor = tree.get_common_ancestor(*outgroup_reps)
-            tree.set_outgroup(common_ancestor)
+    while ingroup not in tree.get_leaf_names():
+        print("You entered a taxon that is not a part of the tree, check spelling!")
+        ingroup = input("\nEnter an ingroup taxon: ")
 
+    while ingroup in outgroup_reps:
+        print("You entered an outgroup taxon, check spelling!")
+        ingroup = input("\nEnter an ingroup taxon: ")
+
+    tree.set_outgroup(ingroup)
+    common_ancestor = tree.get_common_ancestor(*outgroup_reps)
+    tree.set_outgroup(common_ancestor)
     return tree
 
 
