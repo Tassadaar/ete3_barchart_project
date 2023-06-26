@@ -41,13 +41,14 @@ def main():
     # exception handling for flags
     try:
         # check if subset is in the right format and if it contains valid amino acids
-        if len(subsets) != 2:
-            raise ValueError("Subsets contain less or more than 2 groupings, make sure to check format!")
+        if subsets[0] != "NONE":
+            if len(subsets) != 2:
+                raise ValueError("Subsets contain less or more than 2 groupings, make sure to check format!")
+            else:
+                for subset in subsets:
 
-        for subset in subsets:
-
-            if not set(subset).issubset(set(all_amino_acids)):
-                raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
+                    if not set(subset).issubset(set(all_amino_acids)):
+                        raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
 
         # check if frequency_type is valid
         if frequency_type not in frequency_types:
@@ -99,6 +100,7 @@ def main():
             taxon = taxa_dict[node.name]
             dict_list = []
             max_value = 0.2
+            width = 100
 
             if subset == "none":
 
@@ -106,6 +108,7 @@ def main():
                     dict_list.append(taxon.get_aa_abs_freq())
                 elif frequency_type == "relative":
                     dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
+                    width = 10
                     max_value = 0.05
 
             else:
@@ -115,6 +118,7 @@ def main():
                     dict_list = taxon.get_subset_abs_freq()
                 elif frequency_type == "relative":
                     dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
+                    width = 10
                     max_value = 0.05
 
             i = 1
@@ -123,10 +127,10 @@ def main():
                     values=[abs(x) for x in freq_dict.values()],
                     labels=list(freq_dict.keys()),
                     colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
-                    width=100,
-                    height=50
+                    width=width,
+                    height=50,
+                    max_value=max_value
                 )
-                face.max_value = max_value
                 faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
                 i += 1
 
