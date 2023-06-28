@@ -100,7 +100,7 @@ def main():
             taxon = taxa_dict[node.name]
             dict_list = []
             max_value = 0.2
-            width = 100
+            width = 100  # this value controls the scaling of bar widths in all columns
 
             if subset == "none":
 
@@ -108,7 +108,7 @@ def main():
                     dict_list.append(taxon.get_aa_abs_freq())
                 elif frequency_type == "relative":
                     dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
-                    width = 10
+                    width = 10  # when below a certain threshold, the bar widths are scaled to be uniform
                     max_value = 0.05
 
             else:
@@ -118,7 +118,7 @@ def main():
                     dict_list = taxon.get_subset_abs_freq()
                 elif frequency_type == "relative":
                     dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
-                    width = 10
+                    width = 10  # when below a certain threshold, the bar widths are scaled to be uniform
                     max_value = 0.05
 
             i = 1
