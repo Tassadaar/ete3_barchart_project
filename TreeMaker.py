@@ -103,7 +103,7 @@ def main():
             max_value = 0.2
             width = 100  # this value controls the scaling of bar widths in all columns
 
-            if subsets == "none":
+            if subsets[0] == "NONE":
 
                 if frequency_type == "absolute":
                     dict_list.append(taxon.get_aa_abs_freq())
@@ -132,6 +132,8 @@ def main():
                     height=50,
                     max_value=max_value
                 )
+                if subsets[0] != "NONE" and i != len(dict_list):
+                    face.scale_fsize = 1
                 faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
                 i += 1
 
