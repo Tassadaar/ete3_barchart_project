@@ -6,6 +6,7 @@ python TreeMaker.py \
   -t input_files/nematode_CH.tree \
   -n input_files/nematode.fasta \
   -f fasta -m relative \
-  -s fymink,garp
+  -s fymink,garp \
+  -c show
 
 conda deactivate

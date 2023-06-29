@@ -13,7 +13,7 @@ import sys
 import copy
 from Bio import SeqIO
 from Taxon import Taxon
-from ete3 import Tree, faces, TreeStyle, BarChartFace
+from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
 
 all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
@@ -29,6 +29,7 @@ def main():
     parser.add_argument("-s", "--subset", type=str, default="none")
     parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
     parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
+    parser.add_argument("-c", "--chi_square_score", type=str, default="hide")
 
     args = parser.parse_args()
 
@@ -38,6 +39,7 @@ def main():
     frequency_type = args.frequency_type
     subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
     frequency_types = ["absolute", "relative"]
+    chi_square = args.chi_square_score
 
     # exception handling for flags
     try:
@@ -66,6 +68,8 @@ def main():
                 if outgroup_reps[1] not in newick_tree.get_leaf_names():
                     raise ValueError("Invalid outgroup, make sure to check spelling!")
 
+        if chi_square not in ["show", "hide"]:
+            raise ValueError("Invalid chi-square mode, make sure to check spelling!")
     except ValueError as e:
         print(f"Error: {e}")  # print error message
         sys.exit()  # terminate the program
@@ -82,7 +86,7 @@ def main():
         taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
     # calculate relative frequencies if specified
-    if frequency_type == "relative":
+    if frequency_type == "relative" or chi_square == "show":
         # calculate average frequency
         all_seq = all_seq.replace("-", "")
         avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
@@ -131,12 +135,24 @@ def main():
                     colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
                     width=width,
                     height=50,
-                    max_value=max_value
+                    max_value=max_value,
                 )
+                face.margin_right = 10
+
                 if subsets[0] != "NONE" and i != len(dict_list):
                     face.scale_fsize = 1
                 faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
                 i += 1
+
+            if chi_square == "show":
+                text_face = TextFace(
+                    calculate_chi_square(avg_freq_dict,
+                                         taxon.get_all_relative_freq(avg_freq_dict),
+                                         len(all_seq),
+                                         len(taxon.seq)
+                                         )
+                )
+                faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
 
     # render tree
     tree.render(file_name=args.output + ".png",
@@ -147,7 +163,6 @@ def main():
 
 # if user specified outgroup taxa in the flags then root accordingly
 def root(tree, outgroup_reps):
-
     # check if the outgroup is only one taxon
     if len(outgroup_reps) == 1:
         tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup
