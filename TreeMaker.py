@@ -15,60 +15,61 @@ from Bio import SeqIO
 from Taxon import Taxon
 from ete3 import Tree, faces, TreeStyle, BarChartFace
 
-# specify tags
-parser = argparse.ArgumentParser(description="Tree making")
-
-parser.add_argument("-t", "--tree", required=True)
-parser.add_argument("-n", "--file", required=True)
-parser.add_argument("-f", "--format", required=True)
-parser.add_argument("-o", "--output", type=str, default="tree")
-parser.add_argument("-s", "--subset", type=str, default="none")
-parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
-parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
-
-args = parser.parse_args()
-
-# global variables that should not be mutated
-newick_tree = Tree(args.tree)  # tree "growing"
-outgroup_reps = [word.upper() for word in args.outgroup_reps.split(",")]
-frequency_type = args.frequency_type
-subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
-frequency_types = ["absolute", "relative"]
 all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
-
-# exception handling for flags
-try:
-    # check if subset is in the right format and if it contains valid amino acids
-    if subsets[0] != "NONE":
-        if len(subsets) != 2:
-            raise ValueError("Subsets contain less or more than 2 groupings, make sure to check format!")
-        else:
-            for subset in subsets:
-
-                if not set(subset).issubset(set(all_amino_acids)):
-                    raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
-
-    # check if frequency_type is valid
-    if frequency_type not in frequency_types:
-        raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
-
-    # check if the provided outgroup is valid
-    if outgroup_reps[0] != "NONE":
-
-        if outgroup_reps[0] not in newick_tree.get_leaf_names():
-            raise ValueError("Invalid outgroup, make sure to check spelling!")
-
-        elif len(outgroup_reps) > 1:
-
-            if outgroup_reps[1] not in newick_tree.get_leaf_names():
-                raise ValueError("Invalid outgroup, make sure to check spelling!")
-
-except ValueError as e:
-    print(f"Error: {e}")  # print error message
-    sys.exit()  # terminate the program
 
 
 def main():
+    # specify tags
+    parser = argparse.ArgumentParser(description="Tree making")
+
+    parser.add_argument("-t", "--tree", required=True)
+    parser.add_argument("-n", "--file", required=True)
+    parser.add_argument("-f", "--format", required=True)
+    parser.add_argument("-o", "--output", type=str, default="tree")
+    parser.add_argument("-s", "--subset", type=str, default="none")
+    parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
+    parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
+
+    args = parser.parse_args()
+
+    # global variables that should not be mutated
+    newick_tree = Tree(args.tree)  # tree "growing"
+    outgroup_reps = [word.upper() for word in args.outgroup_reps.split(",")]
+    frequency_type = args.frequency_type
+    subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
+    frequency_types = ["absolute", "relative"]
+
+    # exception handling for flags
+    try:
+        # check if subset is in the right format and if it contains valid amino acids
+        if subsets[0] != "NONE":
+            if len(subsets) != 2:
+                raise ValueError("Subsets contain less or more than 2 groupings, make sure to check format!")
+            else:
+                for subset in subsets:
+
+                    if not set(subset).issubset(set(all_amino_acids)):
+                        raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
+
+        # check if frequency_type is valid
+        if frequency_type not in frequency_types:
+            raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
+
+        # check if the provided outgroup is valid
+        if outgroup_reps[0] != "NONE":
+
+            if outgroup_reps[0] not in newick_tree.get_leaf_names():
+                raise ValueError("Invalid outgroup, make sure to check spelling!")
+
+            elif len(outgroup_reps) > 1:
+
+                if outgroup_reps[1] not in newick_tree.get_leaf_names():
+                    raise ValueError("Invalid outgroup, make sure to check spelling!")
+
+    except ValueError as e:
+        print(f"Error: {e}")  # print error message
+        sys.exit()  # terminate the program
+
     tree = copy.copy(newick_tree)  # local copy of the original tree
     taxa_dict = {}  # dictionary to store taxa
     all_seq = ""  # string to hold all the sequences in the alignment
@@ -88,7 +89,7 @@ def main():
 
     # tree rooting
     if outgroup_reps[0] != "NONE":  # check if rooting is required
-        tree = root(tree)
+        tree = root(tree, outgroup_reps)
 
     # tree styling
     tree.ladderize()
@@ -145,7 +146,7 @@ def main():
 
 
 # if user specified outgroup taxa in the flags then root accordingly
-def root(tree):
+def root(tree, outgroup_reps):
 
     # check if the outgroup is only one taxon
     if len(outgroup_reps) == 1:
@@ -181,6 +182,17 @@ def root(tree):
     tree.set_outgroup(common_ancestor)
 
     return tree
+
+
+def calculate_chi_square(align_freqs, taxon_freqs, alignment_len, taxon_seq_len):
+    chi_square_score = 0
+
+    for aa in all_amino_acids:
+        expected_count = align_freqs[aa] * alignment_len
+        observed_count = taxon_freqs[aa] * taxon_seq_len
+        chi_square_score += (observed_count - expected_count) ** 2 / expected_count
+
+    return round(chi_square_score, 3)
 
 
 if __name__ == "__main__":
