@@ -43,7 +43,7 @@ class Test(TestCase):
             else:
                 taxon_freqs[aa] = 1 / 40
 
-        chi_square_score = calculate_chi_square(align_freqs, taxon_freqs, 80, 40)
-        self.assertEqual(25.000, chi_square_score,
+        chi_square_score = calculate_chi_square(align_freqs, taxon_freqs, 40)
+        self.assertEqual(10.0, chi_square_score,
                          f"The chi square score should have been 0.25, but it is {chi_square_score}")
 
