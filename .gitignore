@@ -6,3 +6,4 @@ __pycache__/
 out.txt
 .DS_Store
 Martijn_et_al_2019/
+run_TreeMaker_test.sh

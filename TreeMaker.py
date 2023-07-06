@@ -144,18 +144,21 @@ def main(args):
 
             if chi_square == "show":
                 text_face = TextFace(
-                    calculate_chi_square(avg_freq_dict,
-                                         taxon.get_aa_abs_freq(),
-                                         len(taxon.seq)
-                                         )
+                    calculate_chi_square(
+                        avg_freq_dict,
+                        taxon.get_aa_abs_freq(),
+                        len(taxon.seq)
+                    )
                 )
                 faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
 
     # render tree
-    tree.render(file_name=args.output + ".png",
-                units="px", dpi=70,
-                tree_style=tree_style,
-                layout=layout)
+    tree.render(
+        file_name=args.output + ".png",
+        units="px", dpi=70,
+        tree_style=tree_style,
+        layout=layout
+    )
 
 
 # if user specified outgroup taxa in the flags then root accordingly
@@ -208,5 +211,15 @@ def calculate_chi_square(align_freqs, taxon_freqs, taxon_seq_len):
 
 
 if __name__ == "__main__":
-    args = parser.parse_args()
-    main(args)
+    # emulating commandline arguments for debugging
+    sys.argv = [
+                "TreeMaker.py",
+                "-t", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln.treefile",
+                "-n", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln",
+                "-f", "fasta",
+                "-s", "fymink,garp",
+                "-m", "relative",
+                "-g", "Dechloromonas_aromatica_RCB,Pseudomonas_aeruginosa_PA7"
+    ]
+    arguments = parser.parse_args()
+    main(arguments)
