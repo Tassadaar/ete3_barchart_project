@@ -32,7 +32,7 @@ parser.add_argument("-c", "--chi_square_score", type=str, default="hide")
 
 def main(args):
     # global variables that should not be mutated
-    newick_tree = Tree(args.tree)  # tree "growing"
+    tree = Tree(args.tree)  # tree "growing"
     outgroup_reps = [word for word in args.outgroup_reps.split(",")]
     frequency_type = args.frequency_type
     subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
@@ -58,12 +58,12 @@ def main(args):
         # check if the provided outgroup is valid
         if outgroup_reps[0] != "NONE":
 
-            if outgroup_reps[0] not in newick_tree.get_leaf_names():
+            if outgroup_reps[0] not in tree.get_leaf_names():
                 raise ValueError("Invalid outgroup, make sure to check spelling!")
 
             elif len(outgroup_reps) > 1:
 
-                if outgroup_reps[1] not in newick_tree.get_leaf_names():
+                if outgroup_reps[1] not in tree.get_leaf_names():
                     raise ValueError("Invalid outgroup, make sure to check spelling!")
 
         if chi_square not in ["show", "hide"]:
@@ -72,7 +72,6 @@ def main(args):
         print(f"Error: {e}")  # print error message
         sys.exit()  # terminate the program
 
-    tree = copy.copy(newick_tree)  # local copy of the original tree
     taxa_dict = {}  # dictionary to store taxa
     all_seq = ""  # string to hold all the sequences in the alignment
 
@@ -212,14 +211,14 @@ def calculate_chi_square(align_freqs, taxon_freqs, taxon_seq_len):
 
 if __name__ == "__main__":
     # emulating commandline arguments for debugging
-    sys.argv = [
-                "TreeMaker.py",
-                "-t", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln.treefile",
-                "-n", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln",
-                "-f", "fasta",
-                "-s", "fymink,garp",
-                "-m", "relative",
-                "-g", "Dechloromonas_aromatica_RCB,Pseudomonas_aeruginosa_PA7"
-    ]
+    # sys.argv = [
+    #             "TreeMaker.py",
+    #             "-t", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln.treefile",
+    #             "-n", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln",
+    #             "-f", "fasta",
+    #             "-s", "fymink,garp",
+    #             "-m", "relative",
+    #             "-g", "Dechloromonas_aromatica_RCB,Pseudomonas_aeruginosa_PA7"
+    # ]
     arguments = parser.parse_args()
     main(arguments)
