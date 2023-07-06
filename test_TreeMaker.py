@@ -30,6 +30,13 @@ class Test(TestCase):
         rf_distance = input_tree.robinson_foulds(result_tree)[0]
         self.assertEqual(0, rf_distance, f"The distance should have been 0, but it is {rf_distance}")
 
+    def test_root_large_sample(self):
+        input_tree = Tree("Martijn_et_al_2019/alphaproteobacteria_untreated.aln.treefile")
+        result_tree = Tree("Martijn_et_al_2019/result_tree_large_sample.tree")
+        root(input_tree, ["Dechloromonas_aromatica_RCB", "Pseudomonas_aeruginosa_PA7"])
+        rf_distance = input_tree.robinson_foulds(result_tree)[0]
+        self.assertEqual(0, rf_distance, f"The distance should have been 0, but it is {rf_distance}")
+
     def test_calculate_chi_square_normal(self):
         align_freqs = {}
         taxon_freqs = {}

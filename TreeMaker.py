@@ -17,25 +17,23 @@ from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
 
 all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
+# specify tags
+parser = argparse.ArgumentParser(description="Tree making")
 
-def main():
-    # specify tags
-    parser = argparse.ArgumentParser(description="Tree making")
+parser.add_argument("-t", "--tree", required=True)
+parser.add_argument("-n", "--file", required=True)
+parser.add_argument("-f", "--format", required=True)
+parser.add_argument("-o", "--output", type=str, default="tree")
+parser.add_argument("-s", "--subset", type=str, default="none")
+parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
+parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
+parser.add_argument("-c", "--chi_square_score", type=str, default="hide")
 
-    parser.add_argument("-t", "--tree", required=True)
-    parser.add_argument("-n", "--file", required=True)
-    parser.add_argument("-f", "--format", required=True)
-    parser.add_argument("-o", "--output", type=str, default="tree")
-    parser.add_argument("-s", "--subset", type=str, default="none")
-    parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
-    parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
-    parser.add_argument("-c", "--chi_square_score", type=str, default="hide")
 
-    args = parser.parse_args()
-
+def main(args):
     # global variables that should not be mutated
     newick_tree = Tree(args.tree)  # tree "growing"
-    outgroup_reps = [word.upper() for word in args.outgroup_reps.split(",")]
+    outgroup_reps = [word for word in args.outgroup_reps.split(",")]
     frequency_type = args.frequency_type
     subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
     frequency_types = ["absolute", "relative"]
@@ -155,7 +153,7 @@ def main():
 
     # render tree
     tree.render(file_name=args.output + ".png",
-                units="px", h=2000, w=2500, dpi=70,
+                units="px", dpi=70,
                 tree_style=tree_style,
                 layout=layout)
 
@@ -210,4 +208,5 @@ def calculate_chi_square(align_freqs, taxon_freqs, taxon_seq_len):
 
 
 if __name__ == "__main__":
-    main()
+    args = parser.parse_args()
+    main(args)
