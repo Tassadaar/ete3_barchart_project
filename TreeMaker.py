@@ -125,13 +125,16 @@ def main(args):
             for freq_dict in dict_list:
                 face = BarChartFace(
                     values=[abs(x) for x in freq_dict.values()],
-                    labels=list(freq_dict.keys()),
+                    labels=[" " for x in freq_dict.keys()],
+                    label_fsize=9,  # this value dictates scaling if bar widths are uniform
                     colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
-                    width=10,  # when below a certain threshold, all the bar widths are scaled to be uniform
+                    width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
                     height=50,
                     max_value=max_value,
-                    label_fsize=9  # this value dictates scaling if bar widths are uniform
                 )
+
+                if node.name == tree.get_leaf_names()[-1]:
+                    face.labels = list(freq_dict.keys())
 
                 # ensure a healthy width of gap between the tree and the faces
                 if i == 1:
