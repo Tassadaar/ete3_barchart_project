@@ -32,6 +32,7 @@ parser.add_argument("-c", "--chi_square_score", type=str, default="hide")
 def main(args):
     # global variables that should not be mutated
     tree = Tree(args.tree)  # tree "growing"
+    leaves = tree.get_leaf_names()
     outgroup_reps = [word for word in args.outgroup_reps.split(",")]
     frequency_type = args.frequency_type
     subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
@@ -57,12 +58,12 @@ def main(args):
         # check if the provided outgroup is valid
         if outgroup_reps[0] != "NONE":
 
-            if outgroup_reps[0] not in tree.get_leaf_names():
+            if outgroup_reps[0] not in leaves:
                 raise ValueError("Invalid outgroup, make sure to check spelling!")
 
             elif len(outgroup_reps) > 1:
 
-                if outgroup_reps[1] not in tree.get_leaf_names():
+                if outgroup_reps[1] not in leaves:
                     raise ValueError("Invalid outgroup, make sure to check spelling!")
 
         if chi_square not in ["show", "hide"]:
@@ -129,8 +130,12 @@ def main(args):
                     width=10,  # when below a certain threshold, all the bar widths are scaled to be uniform
                     height=50,
                     max_value=max_value,
-                    label_fsize=10  # this value dictates scaling if bar widths are uniform
+                    label_fsize=9  # this value dictates scaling if bar widths are uniform
                 )
+
+                # ensure a healthy width of gap between the tree and the faces
+                if i == 1:
+                    face.margin_left = 50
                 face.margin_right = 10
 
                 if subsets[0] != "NONE" and i != len(dict_list):
@@ -146,12 +151,13 @@ def main(args):
                         len(taxon.seq)
                     )
                 )
+                text_face.margin_left = 50
                 faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
 
     # render tree
     tree.render(
         file_name=args.output + ".png",
-        units="px",
+        units="px", h=200 * len(leaves),
         tree_style=tree_style,
         layout=layout
     )

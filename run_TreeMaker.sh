@@ -6,7 +6,7 @@ python TreeMaker.py \
   -t input_files/nematode_CH.tree \
   -n input_files/nematode.fasta \
   -f fasta -m relative \
-  -s none \
+  -s fymink,garp \
   -g LOCUST,SEAURCHIN
 
 conda deactivate
