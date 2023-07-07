@@ -3,10 +3,10 @@
 source activate treeProject
 
 python TreeMaker.py \
-  -t Martijn_et_al_2019/alphaproteobacteria_untreated.aln.treefile \
-  -n Martijn_et_al_2019/alphaproteobacteria_untreated.aln \
+  -t input_files/nematode_CH.tree \
+  -n input_files/nematode.fasta \
   -f fasta -m relative \
-  -s fymink,garp \
-  -g Dechloromonas_aromatica_RCB,Pseudomonas_aeruginosa_PA7
+  -s none \
+  -g LOCUST,SEAURCHIN
 
 conda deactivate

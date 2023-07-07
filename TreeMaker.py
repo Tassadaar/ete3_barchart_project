@@ -10,7 +10,6 @@ optional arguments: -m or --mode, type of BarChartFace to load (all or fymink/ga
 
 import argparse
 import sys
-import copy
 from Bio import SeqIO
 from Taxon import Taxon
 from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
@@ -103,7 +102,6 @@ def main(args):
             taxon = taxa_dict[node.name]
             dict_list = []
             max_value = 0.2
-            width = 100  # this value controls the scaling of bar widths in all columns
 
             if subsets[0] == "NONE":
 
@@ -111,7 +109,6 @@ def main(args):
                     dict_list.append(taxon.get_aa_abs_freq())
                 elif frequency_type == "relative":
                     dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
-                    width = 10  # when below a certain threshold, the bar widths are scaled to be uniform
                     max_value = 0.05
 
             else:
@@ -121,7 +118,6 @@ def main(args):
                     dict_list = taxon.get_subset_abs_freq()
                 elif frequency_type == "relative":
                     dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
-                    width = 10  # when below a certain threshold, the bar widths are scaled to be uniform
                     max_value = 0.05
 
             i = 1
@@ -130,14 +126,15 @@ def main(args):
                     values=[abs(x) for x in freq_dict.values()],
                     labels=list(freq_dict.keys()),
                     colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
-                    width=width,
+                    width=10,  # when below a certain threshold, all the bar widths are scaled to be uniform
                     height=50,
                     max_value=max_value,
+                    label_fsize=10  # this value dictates scaling if bar widths are uniform
                 )
                 face.margin_right = 10
 
                 if subsets[0] != "NONE" and i != len(dict_list):
-                    face.scale_fsize = 1
+                    face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
                 faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
                 i += 1
 
@@ -154,7 +151,7 @@ def main(args):
     # render tree
     tree.render(
         file_name=args.output + ".png",
-        units="px", dpi=70,
+        units="px",
         tree_style=tree_style,
         layout=layout
     )
