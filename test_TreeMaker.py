@@ -37,20 +37,5 @@ class Test(TestCase):
         rf_distance = input_tree.robinson_foulds(result_tree)[0]
         self.assertEqual(0, rf_distance, f"The distance should have been 0, but it is {rf_distance}")
 
-    def test_calculate_chi_square_normal(self):
-        align_freqs = {}
-        taxon_freqs = {}
 
-        # generating toy datasets
-        for aa in "ACDEFGHIKLMNPQRSTVWY":
-            align_freqs[aa] = 1 / 20
-
-            if aa in "ACDEFGHIKL":
-                taxon_freqs[aa] = 3 / 40
-            else:
-                taxon_freqs[aa] = 1 / 40
-
-        chi_square_score = calculate_chi_square(align_freqs, taxon_freqs, 40)
-        self.assertEqual(10.0, chi_square_score,
-                         f"The chi square score should have been 0.25, but it is {chi_square_score}")
 

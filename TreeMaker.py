@@ -146,10 +146,8 @@ def main(args):
 
                 if chi_square == "show":
                     text_face = TextFace(
-                        calculate_chi_square(
-                            avg_freq_dict,
-                            taxon.get_aa_abs_freq(),
-                            len(taxon.seq)
+                        taxon.calculate_chi_square(
+                            avg_freq_dict
                         )
                     )
                     text_face.margin_left = 50
@@ -203,17 +201,6 @@ def root(tree, outgroup_reps):
     tree.set_outgroup(common_ancestor)
 
     return tree
-
-
-def calculate_chi_square(align_freqs, taxon_freqs, taxon_seq_len):
-    chi_square_score = 0
-
-    for aa in all_amino_acids:
-        expected_count = align_freqs[aa] * taxon_seq_len
-        observed_count = taxon_freqs[aa] * taxon_seq_len
-        chi_square_score += (observed_count - expected_count) ** 2 / expected_count
-
-    return round(chi_square_score, 1)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,8 @@ calculate said attributes.
 
 
 class Taxon:
+    all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
+
     def __init__(self, name, seq):
         self.name = name
         self.seq = seq.replace("-", "")
@@ -15,7 +17,7 @@ class Taxon:
 
     # absolute frequencies
     def set_aa_abs_freq(self):
-        self.freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in "ACDEFGHIKLMNPQRSTVWY"}
+        self.freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in self.all_amino_acids}
 
     def get_aa_abs_freq(self):
         return self.freq_dict
@@ -51,5 +53,14 @@ class Taxon:
 
         return [group1_rel_freq, group2_rel_freq, other_rel_freq]
 
-    def __str__(self):
-        return f"{self.name}\n{self.group1_freq}\n{self.group2_freq}\n"
+    def calculate_chi_square(self, align_freqs):
+        chi_square_score = 0
+        taxon_seq_len = len(self.seq)
+
+        for aa in self.all_amino_acids:
+            expected_count = align_freqs[aa] * taxon_seq_len
+            observed_count = self.freq_dict[aa] * taxon_seq_len
+            chi_square_score += (observed_count - expected_count) ** 2 / expected_count
+
+        return round(chi_square_score, 1)
+

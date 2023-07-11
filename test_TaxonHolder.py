@@ -23,3 +23,21 @@ class TestTaxon(TestCase):
 
         self.assertEqual(taxon.group1_freq, expected_fymink)
         self.assertEqual(taxon.group2_freq, expected_garp)
+
+    def test_calculate_chi_square_normal(self):
+        align_freqs = {}
+        taxon = Taxon("Toy", "")
+        taxon.seq = "A" * 40
+
+        # generating toy datasets
+        for aa in "ACDEFGHIKLMNPQRSTVWY":
+            align_freqs[aa] = 1 / 20
+
+            if aa in "ACDEFGHIKL":
+                taxon.freq_dict[aa] = 3 / 40
+            else:
+                taxon.freq_dict[aa] = 1 / 40
+
+        chi_square_score = taxon.calculate_chi_square(align_freqs)
+        self.assertEqual(10.0, chi_square_score,
+                         f"The chi square score should have been 0.25, but it is {chi_square_score}")

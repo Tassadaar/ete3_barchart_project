@@ -8,6 +8,7 @@ python TreeMaker.py \
   -f fasta \
   -m relative \
   -s fymink,garp \
-  -g LOCUST,SEAURCHIN
+  -g LOCUST,SEAURCHIN \
+  -c show
 
 conda deactivate
