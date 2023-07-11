@@ -68,102 +68,103 @@ def main(args):
 
         if chi_square not in ["show", "hide"]:
             raise ValueError("Invalid chi-square mode, make sure to check spelling!")
+
+        taxa_dict = {}  # dictionary to store taxa
+        all_seq = ""  # string to hold all the sequences in the alignment
+
+        # read in fasta and parse, then update
+        for seq_record in SeqIO.parse(args.file, args.format):
+            new_taxon = Taxon(seq_record.id, seq_record.seq)
+            all_seq += seq_record.seq
+            new_taxon.set_aa_abs_freq()
+            taxa_dict[seq_record.id] = new_taxon  # get taxa dict
+
+        # calculate relative frequencies if specified
+        if frequency_type == "relative" or chi_square == "show":
+            # calculate average frequency
+            all_seq = all_seq.replace("-", "")
+            avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
+
+        # tree rooting
+        if outgroup_reps[0] != "NONE":  # check if rooting is required
+            tree = root(tree, outgroup_reps)
+
+        # tree styling
+        tree.ladderize()
+        tree_style = TreeStyle()
+        tree_style.show_scale = False  # do not show scale
+
+        # layout function
+        def layout(node):
+
+            if node.is_leaf():
+                taxon = taxa_dict[node.name]
+                dict_list = []
+                max_value = 0.2
+
+                if subsets[0] == "NONE":
+
+                    if frequency_type == "absolute":
+                        dict_list.append(taxon.get_aa_abs_freq())
+                    elif frequency_type == "relative":
+                        dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
+                        max_value = 0.05
+
+                else:
+                    taxon.set_subset_abs_freq(subsets)
+
+                    if frequency_type == "absolute":
+                        dict_list = taxon.get_subset_abs_freq()
+                    elif frequency_type == "relative":
+                        dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
+                        max_value = 0.05
+
+                i = 1
+                for freq_dict in dict_list:
+                    face = BarChartFace(
+                        values=[abs(x) for x in freq_dict.values()],
+                        labels=[" " for x in freq_dict.keys()],
+                        label_fsize=9,  # this value dictates scaling if bar widths are uniform
+                        colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
+                        width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
+                        height=50,
+                        max_value=max_value,
+                    )
+
+                    if node.name == tree.get_leaf_names()[-1]:
+                        face.labels = list(freq_dict.keys())
+
+                    # ensure a healthy width of gap between the tree and the faces
+                    if i == 1:
+                        face.margin_left = 50
+                    face.margin_right = 10
+
+                    if subsets[0] != "NONE" and i != len(dict_list):
+                        face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
+                    faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
+                    i += 1
+
+                if chi_square == "show":
+                    text_face = TextFace(
+                        calculate_chi_square(
+                            avg_freq_dict,
+                            taxon.get_aa_abs_freq(),
+                            len(taxon.seq)
+                        )
+                    )
+                    text_face.margin_left = 50
+                    faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
+
+        # render tree
+        tree.render(
+            file_name=args.output + ".png",
+            units="px", h=200 * len(leaves),
+            tree_style=tree_style,
+            layout=layout
+        )
     except ValueError as e:
         print(f"Error: {e}")  # print error message
         sys.exit()  # terminate the program
-
-    taxa_dict = {}  # dictionary to store taxa
-    all_seq = ""  # string to hold all the sequences in the alignment
-
-    # read in fasta and parse, then update
-    for seq_record in SeqIO.parse(args.file, args.format):
-        new_taxon = Taxon(seq_record.id, seq_record.seq)
-        all_seq += seq_record.seq
-        new_taxon.set_aa_abs_freq()
-        taxa_dict[seq_record.id] = new_taxon  # get taxa dict
-
-    # calculate relative frequencies if specified
-    if frequency_type == "relative" or chi_square == "show":
-        # calculate average frequency
-        all_seq = all_seq.replace("-", "")
-        avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
-
-    # tree rooting
-    if outgroup_reps[0] != "NONE":  # check if rooting is required
-        tree = root(tree, outgroup_reps)
-
-    # tree styling
-    tree.ladderize()
-    tree_style = TreeStyle()
-    tree_style.show_scale = False  # do not show scale
-
-    # layout function
-    def layout(node):
-        if node.is_leaf():
-            taxon = taxa_dict[node.name]
-            dict_list = []
-            max_value = 0.2
-
-            if subsets[0] == "NONE":
-
-                if frequency_type == "absolute":
-                    dict_list.append(taxon.get_aa_abs_freq())
-                elif frequency_type == "relative":
-                    dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
-                    max_value = 0.05
-
-            else:
-                taxon.set_subset_abs_freq(subsets)
-
-                if frequency_type == "absolute":
-                    dict_list = taxon.get_subset_abs_freq()
-                elif frequency_type == "relative":
-                    dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
-                    max_value = 0.05
-
-            i = 1
-            for freq_dict in dict_list:
-                face = BarChartFace(
-                    values=[abs(x) for x in freq_dict.values()],
-                    labels=[" " for x in freq_dict.keys()],
-                    label_fsize=9,  # this value dictates scaling if bar widths are uniform
-                    colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
-                    width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
-                    height=50,
-                    max_value=max_value,
-                )
-
-                if node.name == tree.get_leaf_names()[-1]:
-                    face.labels = list(freq_dict.keys())
-
-                # ensure a healthy width of gap between the tree and the faces
-                if i == 1:
-                    face.margin_left = 50
-                face.margin_right = 10
-
-                if subsets[0] != "NONE" and i != len(dict_list):
-                    face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
-                faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
-                i += 1
-
-            if chi_square == "show":
-                text_face = TextFace(
-                    calculate_chi_square(
-                        avg_freq_dict,
-                        taxon.get_aa_abs_freq(),
-                        len(taxon.seq)
-                    )
-                )
-                text_face.margin_left = 50
-                faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
-
-    # render tree
-    tree.render(
-        file_name=args.output + ".png",
-        units="px", h=200 * len(leaves),
-        tree_style=tree_style,
-        layout=layout
-    )
 
 
 # if user specified outgroup taxa in the flags then root accordingly
