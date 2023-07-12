@@ -33,7 +33,7 @@ def main(args):
     # global variables that should not be mutated
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
-    outgroup_reps = [word for word in args.outgroup_reps.split(",")]
+    outgroup_reps = args.outgroup_reps.split(",")
     frequency_type = args.frequency_type
     subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
     frequency_types = ["absolute", "relative"]
