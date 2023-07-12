@@ -97,61 +97,63 @@ def main(args):
         # layout function
         def layout(node):
 
-            if node.is_leaf():
-                taxon = taxa_dict[node.name]
-                dict_list = []
-                max_value = 0.2
+            if not node.is_leaf():
+                return
 
-                if subsets[0] == "NONE":
+            taxon = taxa_dict[node.name]
+            dict_list = []
+            max_value = 0.2
 
-                    if frequency_type == "absolute":
-                        dict_list.append(taxon.get_aa_abs_freq())
-                    elif frequency_type == "relative":
-                        dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
-                        max_value = 0.05
+            if subsets[0] == "NONE":
 
-                else:
-                    taxon.set_subset_abs_freq(subsets)
+                if frequency_type == "absolute":
+                    dict_list.append(taxon.get_aa_abs_freq())
+                elif frequency_type == "relative":
+                    dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
+                    max_value = 0.05
 
-                    if frequency_type == "absolute":
-                        dict_list = taxon.get_subset_abs_freq()
-                    elif frequency_type == "relative":
-                        dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
-                        max_value = 0.05
+            else:
+                taxon.set_subset_abs_freq(subsets)
 
-                i = 1
-                for freq_dict in dict_list:
-                    face = BarChartFace(
-                        values=[abs(x) for x in freq_dict.values()],
-                        labels=[" " for x in freq_dict.keys()],
-                        label_fsize=9,  # this value dictates scaling if bar widths are uniform
-                        colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
-                        width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
-                        height=50,
-                        max_value=max_value,
+                if frequency_type == "absolute":
+                    dict_list = taxon.get_subset_abs_freq()
+                elif frequency_type == "relative":
+                    dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
+                    max_value = 0.05
+
+            i = 1
+            for freq_dict in dict_list:
+                face = BarChartFace(
+                    values=[abs(x) for x in freq_dict.values()],
+                    labels=[" " for x in freq_dict.keys()],
+                    label_fsize=9,  # this value dictates scaling if bar widths are uniform
+                    colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
+                    width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
+                    height=50,
+                    max_value=max_value,
+                )
+
+                if node.name == tree.get_leaf_names()[-1]:
+                    face.labels = list(freq_dict.keys())
+
+                # ensure a healthy width of gap between the tree and the faces
+                if i == 1:
+                    face.margin_left = 50
+                face.margin_right = 10
+
+                if subsets[0] != "NONE" and i != len(dict_list):
+                    face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
+                faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
+                i += 1
+
+            if chi_square == "show":
+                text_face = TextFace(
+                    taxon.calculate_chi_square(
+                        avg_freq_dict
                     )
-
-                    if node.name == tree.get_leaf_names()[-1]:
-                        face.labels = list(freq_dict.keys())
-
-                    # ensure a healthy width of gap between the tree and the faces
-                    if i == 1:
-                        face.margin_left = 50
-                    face.margin_right = 10
-
-                    if subsets[0] != "NONE" and i != len(dict_list):
-                        face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
-                    faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
-                    i += 1
-
-                if chi_square == "show":
-                    text_face = TextFace(
-                        taxon.calculate_chi_square(
-                            avg_freq_dict
-                        )
-                    )
-                    text_face.margin_left = 50
-                    faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
+                )
+                text_face.margin_left = 50
+                faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
 
         # render tree
         tree.render(
