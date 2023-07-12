@@ -28,15 +28,22 @@ parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
 parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
 parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
+tree = None
+subsets = None
+frequency_type = None
+chi2_score = None
+taxa_dict = None
+avg_freq_dict = None
+
 
 def main(args):
-    # global variables that should not be mutated
+    global tree, subsets, frequency_type, chi2_score, taxa_dict, avg_freq_dict
+
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
     outgroup_reps = args.outgroup_reps.split(",")
     frequency_type = args.frequency_type
     subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
-    frequency_types = ["absolute", "relative"]
     chi2_score = args.show_chi2_score
 
     # exception handling for flags
@@ -52,7 +59,7 @@ def main(args):
                         raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
 
         # check if frequency_type is valid
-        if frequency_type not in frequency_types:
+        if frequency_type not in ["absolute", "relative"]:
             raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
 
         # check if the provided outgroup is valid
@@ -84,73 +91,12 @@ def main(args):
 
         # tree rooting
         if outgroup_reps[0] != "NONE":  # check if rooting is required
-            tree = root(tree, outgroup_reps)
+            tree = root(outgroup_reps)
 
         # tree styling
         tree.ladderize()
         tree_style = TreeStyle()
         tree_style.show_scale = False  # do not show scale
-
-        # layout function
-        def layout(node):
-
-            if not node.is_leaf():
-                return
-
-            taxon = taxa_dict[node.name]
-            dict_list = []
-            max_value = 0.2
-
-            if subsets[0] == "NONE":
-
-                if frequency_type == "absolute":
-                    dict_list.append(taxon.get_aa_abs_freq())
-                elif frequency_type == "relative":
-                    dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
-                    max_value = 0.05
-
-            else:
-                taxon.set_subset_abs_freq(subsets)
-
-                if frequency_type == "absolute":
-                    dict_list = taxon.get_subset_abs_freq()
-                elif frequency_type == "relative":
-                    dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
-                    max_value = 0.05
-
-            i = 1
-            for freq_dict in dict_list:
-                face = BarChartFace(
-                    values=[abs(x) for x in freq_dict.values()],
-                    labels=[" " for x in freq_dict.keys()],
-                    label_fsize=9,  # this value dictates scaling if bar widths are uniform
-                    colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
-                    width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
-                    height=50,
-                    max_value=max_value,
-                )
-
-                if node.name == tree.get_leaf_names()[-1]:
-                    face.labels = list(freq_dict.keys())
-
-                # ensure a healthy width of gap between the tree and the faces
-                if i == 1:
-                    face.margin_left = 50
-                face.margin_right = 10
-
-                if subsets[0] != "NONE" and i != len(dict_list):
-                    face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
-                faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
-                i += 1
-
-            if chi2_score is True:
-                text_face = TextFace(
-                    taxon.calculate_chi_square(
-                        avg_freq_dict
-                    )
-                )
-                text_face.margin_left = 50
-                faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
 
         # render tree
         tree.render(
@@ -159,13 +105,76 @@ def main(args):
             tree_style=tree_style,
             layout=layout
         )
+
     except ValueError as e:
         print(f"Error: {e}")  # print error message
         sys.exit()  # terminate the program
 
 
+# layout function
+def layout(node):
+
+    if not node.is_leaf():
+        return
+
+    taxon = taxa_dict[node.name]
+    dict_list = []
+    max_value = 0.2
+
+    if subsets[0] == "NONE":
+
+        if frequency_type == "absolute":
+            dict_list.append(taxon.get_aa_abs_freq())
+        elif frequency_type == "relative":
+            dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
+            max_value = 0.05
+
+    else:
+        taxon.set_subset_abs_freq(subsets)
+
+        if frequency_type == "absolute":
+            dict_list = taxon.get_subset_abs_freq()
+        elif frequency_type == "relative":
+            dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
+            max_value = 0.05
+
+    i = 1
+    for freq_dict in dict_list:
+        face = BarChartFace(
+            values=[abs(x) for x in freq_dict.values()],
+            labels=[" " for x in freq_dict.keys()],
+            label_fsize=9,  # this value dictates scaling if bar widths are uniform
+            colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
+            width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
+            height=50,
+            max_value=max_value,
+        )
+
+        if node.name == tree.get_leaf_names()[-1]:
+            face.labels = list(freq_dict.keys())
+
+        # ensure a healthy width of gap between the tree and the faces
+        if i == 1:
+            face.margin_left = 50
+        face.margin_right = 10
+
+        if subsets[0] != "NONE" and i != len(dict_list):
+            face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
+        faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
+        i += 1
+
+    if chi2_score is True:
+        text_face = TextFace(
+            taxon.calculate_chi_square(
+                avg_freq_dict
+            )
+        )
+        text_face.margin_left = 50
+        faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
+
+
 # if user specified outgroup taxa in the flags then root accordingly
-def root(tree, outgroup_reps):
+def root(outgroup_reps):
     # check if the outgroup is only one taxon
     if len(outgroup_reps) == 1:
         tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup
