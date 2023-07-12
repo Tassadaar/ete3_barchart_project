@@ -9,6 +9,6 @@ python TreeMaker.py \
   -m relative \
   -s fymink,garp \
   -g LOCUST,SEAURCHIN \
-  -c show
+  -c True
 
 conda deactivate

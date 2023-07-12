@@ -2,7 +2,7 @@
 This program makes a simple unrooted tree from a newwick string, make BarChartFace for each leaf node in layout and
 render said tree to a PNG image.
 
-mandatory arguments: -t or --tree, newwick tree
+mandatory arguments: -t or --tree, newick tree
                      -n or --filename, path to alignment file
                      -f or --format, format of said alignment file (only tested for fasta)
 optional arguments: -m or --mode, type of BarChartFace to load (all or fymink/garp subsets)
@@ -16,7 +16,7 @@ from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
 
 all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
-# specify tags
+# specify options
 parser = argparse.ArgumentParser(description="Tree making")
 
 parser.add_argument("-t", "--tree", required=True)
@@ -26,7 +26,7 @@ parser.add_argument("-o", "--output", type=str, default="tree")
 parser.add_argument("-s", "--subset", type=str, default="none")
 parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
 parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
-parser.add_argument("-c", "--chi_square_score", type=str, default="hide")
+parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
 
 def main(args):
@@ -37,7 +37,7 @@ def main(args):
     frequency_type = args.frequency_type
     subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
     frequency_types = ["absolute", "relative"]
-    chi_square = args.chi_square_score
+    chi2_score = args.show_chi2_score
 
     # exception handling for flags
     try:
@@ -66,9 +66,6 @@ def main(args):
                 if outgroup_reps[1] not in leaves:
                     raise ValueError("Invalid outgroup, make sure to check spelling!")
 
-        if chi_square not in ["show", "hide"]:
-            raise ValueError("Invalid chi-square mode, make sure to check spelling!")
-
         taxa_dict = {}  # dictionary to store taxa
         all_seq = ""  # string to hold all the sequences in the alignment
 
@@ -80,7 +77,7 @@ def main(args):
             taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
         # calculate relative frequencies if specified
-        if frequency_type == "relative" or chi_square == "show":
+        if frequency_type == "relative" or chi2_score is True:
             # calculate average frequency
             all_seq = all_seq.replace("-", "")
             avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
@@ -146,7 +143,7 @@ def main(args):
                 faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
                 i += 1
 
-            if chi_square == "show":
+            if chi2_score is True:
                 text_face = TextFace(
                     taxon.calculate_chi_square(
                         avg_freq_dict
