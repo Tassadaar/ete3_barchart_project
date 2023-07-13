@@ -45,7 +45,6 @@ def main(args):
         for seq_record in SeqIO.parse(args.file, args.format):
             new_taxon = Taxon(seq_record.id, seq_record.seq)
             all_seq += seq_record.seq
-            new_taxon.set_aa_abs_freq()
             taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
         # calculate relative frequencies if specified
@@ -89,7 +88,7 @@ def layout(node):
     if subsets[0] == "NONE":
 
         if frequency_type == "absolute":
-            dict_list.append(taxon.get_aa_abs_freq())
+            dict_list.append(taxon.freq_dict)
         elif frequency_type == "relative":
             dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
             max_value = 0.05

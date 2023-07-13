@@ -10,17 +10,10 @@ class Taxon:
     def __init__(self, name, seq):
         self.name = name
         self.seq = seq.replace("-", "")
-        self.freq_dict = {}
+        self.freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in self.all_amino_acids}
         self.group1_freq = {}
         self.group2_freq = {}
         self.other_freq = {}
-
-    # absolute frequencies
-    def set_aa_abs_freq(self):
-        self.freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in self.all_amino_acids}
-
-    def get_aa_abs_freq(self):
-        return self.freq_dict
 
     def get_all_relative_freq(self, avg_freq_dict):
         return {aa: self.freq_dict[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
