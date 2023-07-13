@@ -31,21 +31,11 @@ def main(args):
     leaves = tree.get_leaf_names()
     outgroup_reps = args.outgroup_reps.split(",")
     frequency_type = args.frequency_type
-    subsets = [word.upper() for word in args.subset.split(",")]  # a list assumed to have two items
+    subsets = args.subset  # a list assumed to have two items
     chi2_score = args.show_chi2_score
 
     # exception handling for flags
     try:
-        # check if subset is in the right format and if it contains valid amino acids
-        if subsets[0] != "NONE":
-            if len(subsets) != 2:
-                raise ValueError("Subsets contain less or more than 2 groupings, make sure to check format!")
-            else:
-                for subset in subsets:
-
-                    if not set(subset).issubset(set(all_amino_acids)):
-                        raise ValueError("Subsets contain invalid amino acid(s), make sure to check spelling!")
-
         # check if frequency_type is valid
         if frequency_type not in ["absolute", "relative"]:
             raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
@@ -199,6 +189,25 @@ def root(outgroup_reps):
     return tree
 
 
+"""
+the following functions are for argument validation
+"""
+
+
+# check if subset is in the right format and if it contains valid amino acids
+def validate_subset(subset):
+    allowed_characters = set(all_amino_acids)
+    subsets = subset.upper().split(",")
+
+    if len(subsets) != 2:
+        raise argparse.ArgumentTypeError(f"Subset contains less or more than 2 groupings: {subset}")
+    elif not set(subsets[0]).issubset(allowed_characters) or not set(subsets[1]).issubset(allowed_characters):
+        raise argparse.ArgumentTypeError(f"Subsets contain invalid amino acid(s)")
+
+    return subsets
+
+
+# Guard against undesired invocation upon import
 if __name__ == "__main__":
     # specify options
     parser = argparse.ArgumentParser(description="Tree making")
@@ -207,7 +216,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--file", required=True)
     parser.add_argument("-f", "--format", required=True)
     parser.add_argument("-o", "--output", type=str, default="tree")
-    parser.add_argument("-s", "--subset", type=str, default="none")
+    parser.add_argument("-s", "--subset", type=validate_subset)
     parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
     parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
     parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
