@@ -56,7 +56,7 @@ def main(args):
 
         # tree rooting
         if outgroup_reps[0] != "NONE":  # check if rooting is required
-            tree = root(outgroup_reps)
+            tree = root(tree, outgroup_reps)
 
         # tree styling
         tree.ladderize()
@@ -139,7 +139,7 @@ def layout(node):
 
 
 # if user specified outgroup taxa in the flags then root accordingly
-def root(outgroup_reps):
+def root(tree, outgroup_reps):
     # check if the outgroup is only one taxon
     if len(outgroup_reps) == 1:
         tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup

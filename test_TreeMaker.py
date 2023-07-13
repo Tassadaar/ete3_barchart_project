@@ -1,6 +1,6 @@
 from unittest import TestCase
 from ete3 import Tree
-from TreeMaker import root, calculate_chi_square
+from TreeMaker import root
 
 
 class Test(TestCase):
