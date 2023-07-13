@@ -16,18 +16,6 @@ from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
 
 all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
-# specify options
-parser = argparse.ArgumentParser(description="Tree making")
-
-parser.add_argument("-t", "--tree", required=True)
-parser.add_argument("-n", "--file", required=True)
-parser.add_argument("-f", "--format", required=True)
-parser.add_argument("-o", "--output", type=str, default="tree")
-parser.add_argument("-s", "--subset", type=str, default="none")
-parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
-parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
-parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
-
 tree = None
 subsets = None
 frequency_type = None
@@ -212,6 +200,18 @@ def root(outgroup_reps):
 
 
 if __name__ == "__main__":
+    # specify options
+    parser = argparse.ArgumentParser(description="Tree making")
+
+    parser.add_argument("-t", "--tree", required=True)
+    parser.add_argument("-n", "--file", required=True)
+    parser.add_argument("-f", "--format", required=True)
+    parser.add_argument("-o", "--output", type=str, default="tree")
+    parser.add_argument("-s", "--subset", type=str, default="none")
+    parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
+    parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
+    parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
+
     # emulating commandline arguments for debugging
     # sys.argv = [
     #             "TreeMaker.py",
