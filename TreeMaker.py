@@ -36,10 +36,6 @@ def main(args):
 
     # exception handling for flags
     try:
-        # check if frequency_type is valid
-        if frequency_type not in ["absolute", "relative"]:
-            raise ValueError("Invalid tag for frequency type, make sure to check the list of valid tags and spelling!")
-
         # check if the provided outgroup is valid
         if outgroup_reps[0] != "NONE":
 
@@ -207,6 +203,18 @@ def validate_subset(subset):
     return subsets
 
 
+# check if frequency_type is valid
+def validate_frequency(freq_type):
+    allowed_types = ["absolute", "relative"]
+
+    if freq_type not in allowed_types:
+        raise argparse.ArgumentTypeError(
+            "Invalid tag for frequency type, make sure to check the list of valid tags and spelling!"
+        )
+
+    return freq_type
+
+
 # Guard against undesired invocation upon import
 if __name__ == "__main__":
     # specify options
@@ -217,7 +225,7 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--format", required=True)
     parser.add_argument("-o", "--output", type=str, default="tree")
     parser.add_argument("-s", "--subset", type=validate_subset)
-    parser.add_argument("-m", "--frequency_type", type=str, default="absolute")
+    parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
     parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
     parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
@@ -231,5 +239,6 @@ if __name__ == "__main__":
     #             "-m", "relative",
     #             "-g", "Dechloromonas_aromatica_RCB,Pseudomonas_aeruginosa_PA7"
     # ]
+
     arguments = parser.parse_args()
     main(arguments)
