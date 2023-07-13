@@ -14,15 +14,6 @@ from Bio import SeqIO
 from Taxon import Taxon
 from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
 
-all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
-
-tree = None
-subsets = None
-frequency_type = None
-chi2_score = None
-taxa_dict = None
-avg_freq_dict = None
-
 
 def main(args):
     global tree, subsets, frequency_type, chi2_score, taxa_dict, avg_freq_dict
@@ -217,7 +208,16 @@ def validate_frequency(freq_type):
 
 # Guard against undesired invocation upon import
 if __name__ == "__main__":
-    # specify options
+    all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
+
+    tree = None
+    subsets = None
+    frequency_type = None
+    chi2_score = None
+    taxa_dict = None
+    avg_freq_dict = None
+
+    # specify options, disable for debugging
     parser = argparse.ArgumentParser(description="Tree making")
 
     parser.add_argument("-t", "--tree", required=True)
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
     parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
-    # emulating commandline arguments for debugging
+    # emulating commandline arguments for debugging, disable for normal execution
     # sys.argv = [
     #             "TreeMaker.py",
     #             "-t", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln.treefile",
