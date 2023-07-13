@@ -20,59 +20,48 @@ def main(args):
 
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
-    outgroup_reps = args.outgroup_reps.split(",")
+
+    try:
+        outgroup_reps = validate_outgroup(args.outgroup_reps, leaves)
+    except argparse.ArgumentTypeError as e:
+        print(e)
+        sys.exit()
+
     frequency_type = args.frequency_type
     subsets = args.subset  # a list assumed to have two items
     chi2_score = args.show_chi2_score
 
-    # exception handling for flags
-    try:
-        # check if the provided outgroup is valid
-        if outgroup_reps[0] != "NONE":
+    taxa_dict = {}  # dictionary to store taxa
+    all_seq = ""  # string to hold all the sequences in the alignment
 
-            if outgroup_reps[0] not in leaves:
-                raise ValueError("Invalid outgroup, make sure to check spelling!")
+    # read in fasta and parse, then update
+    for seq_record in SeqIO.parse(args.file, args.format):
+        new_taxon = Taxon(seq_record.id, seq_record.seq)
+        all_seq += seq_record.seq
+        taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
-            elif len(outgroup_reps) > 1:
+    # calculate relative frequencies if specified
+    if frequency_type == "relative" or chi2_score is True:
+        # calculate average frequency
+        all_seq = all_seq.replace("-", "")
+        avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
-                if outgroup_reps[1] not in leaves:
-                    raise ValueError("Invalid outgroup, make sure to check spelling!")
+    # tree rooting
+    if outgroup_reps[0] != "NONE":  # check if rooting is required
+        tree = root(tree, outgroup_reps)
 
-        taxa_dict = {}  # dictionary to store taxa
-        all_seq = ""  # string to hold all the sequences in the alignment
+    # tree styling
+    tree.ladderize()
+    tree_style = TreeStyle()
+    tree_style.show_scale = False  # do not show scale
 
-        # read in fasta and parse, then update
-        for seq_record in SeqIO.parse(args.file, args.format):
-            new_taxon = Taxon(seq_record.id, seq_record.seq)
-            all_seq += seq_record.seq
-            taxa_dict[seq_record.id] = new_taxon  # get taxa dict
-
-        # calculate relative frequencies if specified
-        if frequency_type == "relative" or chi2_score is True:
-            # calculate average frequency
-            all_seq = all_seq.replace("-", "")
-            avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
-
-        # tree rooting
-        if outgroup_reps[0] != "NONE":  # check if rooting is required
-            tree = root(tree, outgroup_reps)
-
-        # tree styling
-        tree.ladderize()
-        tree_style = TreeStyle()
-        tree_style.show_scale = False  # do not show scale
-
-        # render tree
-        tree.render(
-            file_name=args.output + ".png",
-            units="px", h=200 * len(leaves),
-            tree_style=tree_style,
-            layout=layout
-        )
-
-    except ValueError as e:
-        print(f"Error: {e}")  # print error message
-        sys.exit()  # terminate the program
+    # render tree
+    tree.render(
+        file_name=args.output + ".png",
+        units="px", h=200 * len(leaves),
+        tree_style=tree_style,
+        layout=layout
+    )
 
 
 # layout function
@@ -203,6 +192,23 @@ def validate_frequency(freq_type):
         )
 
     return freq_type
+
+
+# check if the provided outgroup is valid
+def validate_outgroup(outgroup_reps, leaves):
+    outgroup_reps = outgroup_reps.split(",")
+
+    if outgroup_reps[0] != "NONE":
+
+        if outgroup_reps[0] not in leaves:
+            raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
+
+        elif len(outgroup_reps) > 1:
+
+            if outgroup_reps[1] not in leaves:
+                raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
+
+    return outgroup_reps
 
 
 # Guard against undesired invocation upon import
