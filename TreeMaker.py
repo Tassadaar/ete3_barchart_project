@@ -93,15 +93,7 @@ def layout(node):
 
     i = 1
     for freq_dict in dict_list:
-        face = BarChartFace(
-            values=[abs(x) for x in freq_dict.values()],
-            labels=[" " for x in freq_dict.keys()],
-            label_fsize=9,  # this value dictates scaling if bar widths are uniform
-            colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
-            width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
-            height=50,
-            max_value=max_value,
-        )
+        face = get_barchart_face(freq_dict, max_value)
 
         if node.name == tree.get_leaf_names()[-1]:
             face.labels = list(freq_dict.keys())
@@ -118,12 +110,24 @@ def layout(node):
 
     if chi2_score is True:
         text_face = TextFace(
-            taxon.calculate_chi_square(
-                avg_freq_dict
-            )
+            taxon.calculate_chi_square(avg_freq_dict)
         )
         text_face.margin_left = 50
         faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
+
+
+def get_barchart_face(freq_dict, max_value):
+    face = BarChartFace(
+        values=[abs(x) for x in freq_dict.values()],
+        labels=[" " for x in freq_dict.keys()],
+        label_fsize=9,  # this value dictates scaling if bar widths are uniform
+        colors=["blue" if f > 0 else "red" for f in freq_dict.values()],
+        width=40,  # when below a certain threshold, all the bar widths are scaled to be uniform
+        height=50,
+        max_value=max_value,
+    )
+
+    return face
 
 
 # if user specified outgroup taxa in the flags then root accordingly
