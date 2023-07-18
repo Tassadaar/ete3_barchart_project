@@ -88,7 +88,7 @@ def layout(node):
         faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
         i += 1
 
-    if chi2_score is True:
+    if taxon.chi_square_score != 0:
         text_face = TextFace(taxon.chi_square_score)
         text_face.margin_left = 50
         faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
@@ -160,7 +160,7 @@ parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
 
 def main(args):
-    global tree, chi2_score, taxa_dict
+    global tree, taxa_dict
 
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
@@ -231,7 +231,6 @@ if __name__ == "__main__":
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
     tree = None
-    chi2_score = None
     taxa_dict = None
 
     # emulating commandline arguments for debugging, disable for normal execution
