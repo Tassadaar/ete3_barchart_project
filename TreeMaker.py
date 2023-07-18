@@ -15,52 +15,51 @@ from Taxon import Taxon
 from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
 
 
-def main(args):
-    global tree, subsets, frequency_type, chi2_score, taxa_dict, avg_freq_dict
+# check if subset is in the right format and if it contains valid amino acids
+def validate_subset(subset):
+    allowed_characters = set(all_amino_acids)
+    subsets = subset.upper().split(",")
 
-    tree = Tree(args.tree)  # tree "growing"
-    leaves = tree.get_leaf_names()
+    if len(subsets) != 2:
+        raise argparse.ArgumentTypeError(f"Subset contains less or more than 2 groupings: {subset}")
+    elif not set(subsets[0]).issubset(allowed_characters) or not set(subsets[1]).issubset(allowed_characters):
+        raise argparse.ArgumentTypeError(f"Subsets contain invalid amino acid(s)")
 
-    try:
-        outgroup_reps = validate_outgroup(args.outgroup_reps, leaves)
-    except argparse.ArgumentTypeError as e:
-        print(e)
-        sys.exit()
+    return subsets
 
-    frequency_type = args.frequency_type
-    subsets = args.subset  # a list assumed to have two items
-    chi2_score = args.show_chi2_score
 
-    taxa_dict = {}  # dictionary to store taxa
-    all_seq = ""  # string to hold all the sequences in the alignment
+# check if frequency_type is valid
+def validate_frequency(freq_type):
+    allowed_types = ["absolute", "relative"]
 
-    # read in fasta and parse, then update
-    for seq_record in SeqIO.parse(args.file, args.format):
-        new_taxon = Taxon(seq_record.id, seq_record.seq)
-        all_seq += str(seq_record.seq).replace("-", "")
-        taxa_dict[seq_record.id] = new_taxon  # get taxa dict
+    if freq_type not in allowed_types:
+        raise argparse.ArgumentTypeError(
+            "Invalid tag for frequency type, make sure to check the list of valid tags and spelling!"
+        )
 
-    # calculate relative frequencies if specified
-    if frequency_type == "relative" or chi2_score is True:
-        # calculate average frequency
-        avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
+    return freq_type
 
-    # tree rooting
-    if outgroup_reps[0] != "NONE":  # check if rooting is required
-        tree = root(tree, outgroup_reps)
 
-    # tree styling
-    tree.ladderize()
-    tree_style = TreeStyle()
-    tree_style.show_scale = False  # do not show scale
+# check if the provided outgroup is valid
+def validate_outgroup(outgroup_reps, leaves):
+    outgroup_reps = outgroup_reps.split(",")
 
-    # render tree
-    tree.render(
-        file_name=args.output + ".png",
-        units="px", h=200 * len(leaves),
-        tree_style=tree_style,
-        layout=layout
-    )
+    if outgroup_reps[0] != "NONE":
+
+        if outgroup_reps[0] not in leaves:
+            raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
+
+        elif len(outgroup_reps) > 1:
+
+            if outgroup_reps[1] not in leaves:
+                raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
+
+    return outgroup_reps
+
+
+"""
+the above functions are for argument validation
+"""
 
 
 # layout function
@@ -167,51 +166,65 @@ def root(tree, outgroup_reps):
     return tree
 
 
-"""
-the following functions are for argument validation
-"""
+# specify options, disable for debugging
+parser = argparse.ArgumentParser(description="Tree making")
+
+parser.add_argument("-t", "--tree", required=True)
+parser.add_argument("-n", "--file", required=True)
+parser.add_argument("-f", "--format", required=True)
+parser.add_argument("-o", "--output", type=str, default="tree")
+parser.add_argument("-s", "--subset", type=validate_subset)
+parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
+parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
+parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
 
-# check if subset is in the right format and if it contains valid amino acids
-def validate_subset(subset):
-    allowed_characters = set(all_amino_acids)
-    subsets = subset.upper().split(",")
+def main(args):
+    global tree, subsets, frequency_type, chi2_score, taxa_dict, avg_freq_dict
 
-    if len(subsets) != 2:
-        raise argparse.ArgumentTypeError(f"Subset contains less or more than 2 groupings: {subset}")
-    elif not set(subsets[0]).issubset(allowed_characters) or not set(subsets[1]).issubset(allowed_characters):
-        raise argparse.ArgumentTypeError(f"Subsets contain invalid amino acid(s)")
+    tree = Tree(args.tree)  # tree "growing"
+    leaves = tree.get_leaf_names()
 
-    return subsets
+    try:
+        outgroup_reps = validate_outgroup(args.outgroup_reps, leaves)
+    except argparse.ArgumentTypeError as e:
+        print(e)
+        sys.exit()
 
+    frequency_type = args.frequency_type
+    subsets = args.subset  # a list assumed to have two items
+    chi2_score = args.show_chi2_score
 
-# check if frequency_type is valid
-def validate_frequency(freq_type):
-    allowed_types = ["absolute", "relative"]
+    taxa_dict = {}  # dictionary to store taxa
+    all_seq = ""  # string to hold all the sequences in the alignment
 
-    if freq_type not in allowed_types:
-        raise argparse.ArgumentTypeError(
-            "Invalid tag for frequency type, make sure to check the list of valid tags and spelling!"
-        )
+    # read in fasta and parse, then update
+    for seq_record in SeqIO.parse(args.file, args.format):
+        new_taxon = Taxon(seq_record.id, seq_record.seq)
+        all_seq += str(seq_record.seq).replace("-", "")
+        taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
-    return freq_type
+    # calculate relative frequencies if specified
+    if frequency_type == "relative" or chi2_score is True:
+        # calculate average frequency
+        avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
+    # tree rooting
+    if outgroup_reps[0] != "NONE":  # check if rooting is required
+        tree = root(tree, outgroup_reps)
 
-# check if the provided outgroup is valid
-def validate_outgroup(outgroup_reps, leaves):
-    outgroup_reps = outgroup_reps.split(",")
+    # tree styling
+    tree.ladderize()
+    tree_style = TreeStyle()
+    tree_style.show_scale = False  # do not show scale
 
-    if outgroup_reps[0] != "NONE":
-
-        if outgroup_reps[0] not in leaves:
-            raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
-
-        elif len(outgroup_reps) > 1:
-
-            if outgroup_reps[1] not in leaves:
-                raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
-
-    return outgroup_reps
+    # render tree
+    tree.render(
+        file_name=args.output + ".png",
+        units="px", h=200 * len(leaves),
+        tree_style=tree_style,
+        layout=layout
+    )
 
 
 # Guard against undesired invocation upon import
@@ -224,18 +237,6 @@ if __name__ == "__main__":
     chi2_score = None
     taxa_dict = None
     avg_freq_dict = None
-
-    # specify options, disable for debugging
-    parser = argparse.ArgumentParser(description="Tree making")
-
-    parser.add_argument("-t", "--tree", required=True)
-    parser.add_argument("-n", "--file", required=True)
-    parser.add_argument("-f", "--format", required=True)
-    parser.add_argument("-o", "--output", type=str, default="tree")
-    parser.add_argument("-s", "--subset", type=validate_subset)
-    parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
-    parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
-    parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
     # emulating commandline arguments for debugging, disable for normal execution
     # sys.argv = [
