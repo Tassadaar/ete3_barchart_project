@@ -10,17 +10,19 @@ class Taxon:
     def __init__(self, name, seq):
         self.name = name
         self.seq = str(seq).replace("-", "")
-        self.freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in self.all_amino_acids}
+        self.freqs = {aa: self.seq.count(aa) / len(self.seq) for aa in self.all_amino_acids}
+        self.display_freqs = self.freqs
         self.group1_freq = {}
         self.group2_freq = {}
         self.other_freq = {}
+        self.display_max_value = 0.2
 
-    def get_all_relative_freq(self, avg_freq_dict):
-        return {aa: self.freq_dict[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
+    def set_all_relative_freq(self, avg_freq_dict):
+        self.display_freqs = {aa: self.display_freqs[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
 
     def set_subset_abs_freq(self, subsets):
 
-        for key, value in self.freq_dict.items():
+        for key, value in self.display_freqs.items():
             if key in subsets[0]:
                 self.group1_freq[key] = value
             elif key in subsets[1]:
@@ -28,10 +30,9 @@ class Taxon:
             else:
                 self.other_freq[key] = value
 
-    def get_subset_abs_freq(self):
-        return [self.group1_freq, self.group2_freq, self.other_freq]
+        self.display_freqs = [self.group1_freq, self.group2_freq, self.other_freq]
 
-    def get_subset_relative_freq(self, subsets, avg_freq_dict):
+    def set_subset_relative_freq(self, subsets, avg_freq_dict):
         group1_rel_freq = {}
         group2_rel_freq = {}
         other_rel_freq = {}
@@ -44,7 +45,7 @@ class Taxon:
             else:
                 other_rel_freq[aa] = self.other_freq[aa] - avg_freq
 
-        return [group1_rel_freq, group2_rel_freq, other_rel_freq]
+        self.display_freqs = [group1_rel_freq, group2_rel_freq, other_rel_freq]
 
     def calculate_chi_square(self, align_freqs):
         chi_square_score = 0
@@ -52,7 +53,7 @@ class Taxon:
 
         for aa in self.all_amino_acids:
             expected_count = align_freqs[aa] * taxon_seq_len
-            observed_count = self.freq_dict[aa] * taxon_seq_len
+            observed_count = self.freqs[aa] * taxon_seq_len
             chi_square_score += (observed_count - expected_count) ** 2 / expected_count
 
         return round(chi_square_score, 1)

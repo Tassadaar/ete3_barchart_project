@@ -33,9 +33,9 @@ class TestTaxon(TestCase):
             align_freqs[aa] = 1 / 20
 
             if aa in "ACDEFGHIKL":
-                taxon.freq_dict[aa] = 3 / 40
+                taxon.display_freqs[aa] = 3 / 40
             else:
-                taxon.freq_dict[aa] = 1 / 40
+                taxon.display_freqs[aa] = 1 / 40
 
         chi_square_score = taxon.calculate_chi_square(align_freqs)
         self.assertEqual(10.0, chi_square_score,

@@ -69,29 +69,11 @@ def layout(node):
         return
 
     taxon = taxa_dict[node.name]
-    dict_list = []
-    max_value = 0.2
-
-    if subsets[0] == "NONE":
-
-        if frequency_type == "absolute":
-            dict_list.append(taxon.freq_dict)
-        elif frequency_type == "relative":
-            dict_list.append(taxon.get_all_relative_freq(avg_freq_dict))
-            max_value = 0.05
-
-    else:
-        taxon.set_subset_abs_freq(subsets)
-
-        if frequency_type == "absolute":
-            dict_list = taxon.get_subset_abs_freq()
-        elif frequency_type == "relative":
-            dict_list = taxon.get_subset_relative_freq(subsets, avg_freq_dict)
-            max_value = 0.05
+    dict_list = taxon.display_freqs
 
     i = 1
     for freq_dict in dict_list:
-        face = get_barchart_face(freq_dict, max_value)
+        face = get_barchart_face(freq_dict, taxon.display_max_value)
 
         if node.name == tree.get_leaf_names()[-1]:
             face.labels = list(freq_dict.keys())
@@ -204,14 +186,30 @@ def main(args):
         all_seq += str(seq_record.seq).replace("-", "")
         taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
+    # tree rooting
+    if outgroup_reps[0] != "NONE":  # check if rooting is required
+        tree = root(tree, outgroup_reps)
+
     # calculate relative frequencies if specified
     if frequency_type == "relative" or chi2_score is True:
         # calculate average frequency
         avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
-    # tree rooting
-    if outgroup_reps[0] != "NONE":  # check if rooting is required
-        tree = root(tree, outgroup_reps)
+    # determine which frequencies to display
+    for taxon in taxa_dict.values():
+
+        if subsets[0] == "NONE":
+
+            if frequency_type == "relative":
+                taxon.set_all_relative_freq(avg_freq_dict)
+                taxon.display_max_value = 0.05
+
+        else:
+            taxon.set_subset_abs_freq(subsets)
+
+            if frequency_type == "relative":
+                taxon.set_subset_relative_freq(subsets, avg_freq_dict)
+                taxon.display_max_value = 0.05
 
     # tree styling
     tree.ladderize()
