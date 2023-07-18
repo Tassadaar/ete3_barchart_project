@@ -162,7 +162,7 @@ parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
 
 def main(args):
-    global tree, subsets, frequency_type, chi2_score, taxa_dict, avg_freq_dict
+    global tree, subsets, chi2_score, taxa_dict, avg_freq_dict
 
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
@@ -231,7 +231,6 @@ if __name__ == "__main__":
 
     tree = None
     subsets = None
-    frequency_type = None
     chi2_score = None
     taxa_dict = None
     avg_freq_dict = None
