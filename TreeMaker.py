@@ -89,9 +89,7 @@ def layout(node):
         i += 1
 
     if chi2_score is True:
-        text_face = TextFace(
-            taxon.calculate_chi_square(avg_freq_dict)
-        )
+        text_face = TextFace(taxon.chi_square_score)
         text_face.margin_left = 50
         faces.add_face_to_node(face=text_face, node=node, column=i, position="aligned")
 
@@ -162,7 +160,7 @@ parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
 
 def main(args):
-    global tree, subsets, chi2_score, taxa_dict, avg_freq_dict
+    global tree, subsets, chi2_score, taxa_dict
 
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
@@ -211,6 +209,9 @@ def main(args):
                 taxon.set_subset_relative_freq(subsets, avg_freq_dict)
                 taxon.display_max_value = 0.05
 
+        if chi2_score is True:
+            taxon.calculate_chi_square(avg_freq_dict)
+
     # tree styling
     tree.ladderize()
     tree_style = TreeStyle()
@@ -233,7 +234,6 @@ if __name__ == "__main__":
     subsets = None
     chi2_score = None
     taxa_dict = None
-    avg_freq_dict = None
 
     # emulating commandline arguments for debugging, disable for normal execution
     # sys.argv = [

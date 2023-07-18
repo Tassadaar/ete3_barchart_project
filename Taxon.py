@@ -16,6 +16,7 @@ class Taxon:
         self.group2_freq = {}
         self.other_freq = {}
         self.display_max_value = 0.2
+        self.chi_square_score = 0
 
     def set_all_relative_freq(self, avg_freq_dict):
         self.display_freqs = {aa: self.display_freqs[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
@@ -56,5 +57,5 @@ class Taxon:
             observed_count = self.freqs[aa] * taxon_seq_len
             chi_square_score += (observed_count - expected_count) ** 2 / expected_count
 
-        return round(chi_square_score, 1)
+        self.chi_square_score = round(chi_square_score, 1)
 
