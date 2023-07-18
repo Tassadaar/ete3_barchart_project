@@ -9,7 +9,7 @@ class Taxon:
 
     def __init__(self, name, seq):
         self.name = name
-        self.seq = seq.replace("-", "")
+        self.seq = str(seq).replace("-", "")
         self.freq_dict = {aa: self.seq.count(aa) / len(self.seq) for aa in self.all_amino_acids}
         self.group1_freq = {}
         self.group2_freq = {}

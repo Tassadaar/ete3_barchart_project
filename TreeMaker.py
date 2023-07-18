@@ -37,7 +37,7 @@ def main(args):
     # read in fasta and parse, then update
     for seq_record in SeqIO.parse(args.file, args.format):
         new_taxon = Taxon(seq_record.id, seq_record.seq)
-        all_seq += seq_record.seq.replace("-", "")
+        all_seq += str(seq_record.seq).replace("-", "")
         taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
     # calculate relative frequencies if specified
