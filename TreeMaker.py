@@ -61,6 +61,18 @@ def validate_outgroup(outgroup_reps, leaves):
 the above functions are for argument validation
 """
 
+# specify options, disable for debugging
+parser = argparse.ArgumentParser(description="Tree making")
+
+parser.add_argument("-t", "--tree", required=True)
+parser.add_argument("-n", "--file", required=True)
+parser.add_argument("-f", "--format", required=True)
+parser.add_argument("-o", "--output", type=str, default="tree")
+parser.add_argument("-s", "--subset", type=validate_subset)
+parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
+parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
+parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
+
 
 # layout function
 def layout(node):
@@ -144,19 +156,6 @@ def root(tree, outgroup_reps):
     tree.set_outgroup(common_ancestor)
 
     return tree
-
-
-# specify options, disable for debugging
-parser = argparse.ArgumentParser(description="Tree making")
-
-parser.add_argument("-t", "--tree", required=True)
-parser.add_argument("-n", "--file", required=True)
-parser.add_argument("-f", "--format", required=True)
-parser.add_argument("-o", "--output", type=str, default="tree")
-parser.add_argument("-s", "--subset", type=validate_subset)
-parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
-parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
-parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
 
 def main(args):
