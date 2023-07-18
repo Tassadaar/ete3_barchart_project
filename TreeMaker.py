@@ -83,7 +83,7 @@ def layout(node):
             face.margin_left = 50
         face.margin_right = 10
 
-        if subsets[0] != "NONE" and i != len(dict_list):
+        if len(freq_dict) > 1 and i != len(dict_list):
             face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
         faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
         i += 1
@@ -160,7 +160,7 @@ parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
 
 def main(args):
-    global tree, subsets, chi2_score, taxa_dict
+    global tree, chi2_score, taxa_dict
 
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
@@ -231,7 +231,6 @@ if __name__ == "__main__":
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
     tree = None
-    subsets = None
     chi2_score = None
     taxa_dict = None
 
