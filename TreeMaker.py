@@ -224,6 +224,8 @@ def main(args):
         layout=layout
     )
 
+    print("Done.")
+
 
 # Guard against undesired invocation upon import
 if __name__ == "__main__":
