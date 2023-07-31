@@ -30,11 +30,10 @@ def validate_subsets(subset):
 
 # check if frequency_type is valid
 def validate_frequency(freq_type):
-    allowed_types = ["absolute", "relative"]
 
-    if freq_type not in allowed_types:
+    if freq_type not in ["absolute", "relative"]:
         raise argparse.ArgumentTypeError(
-            "Invalid tag for frequency type, make sure to check the list of valid tags and spelling!"
+            "Invalid tag for frequency type, only \"absolute\" or \"relative\" are allowed!"
         )
 
     return freq_type
