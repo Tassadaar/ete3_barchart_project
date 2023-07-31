@@ -16,14 +16,14 @@ from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
 
 
 # check if subset is in the right format and if it contains valid amino acids
-def validate_subset(subset):
-    allowed_characters = set(all_amino_acids)
-    subsets = subset.upper().split(",")
+def validate_subsets(subset):
+    subsets = [aa_group.upper() for aa_group in subset.split(",")]
 
     if len(subsets) != 2:
-        raise argparse.ArgumentTypeError(f"Subset contains less or more than 2 groupings: {subset}")
-    elif not set(subsets[0]).issubset(allowed_characters) or not set(subsets[1]).issubset(allowed_characters):
-        raise argparse.ArgumentTypeError(f"Subsets contain invalid amino acid(s)")
+        raise argparse.ArgumentTypeError(f"Subsets does not have exactly 2 groupings: {subset}")
+
+    if any(char not in all_amino_acids for aa_group in subsets for char in aa_group):
+        raise argparse.ArgumentTypeError(f"At least one subset contains invalid amino acid(s)")
 
     return subsets
 
@@ -68,7 +68,7 @@ parser.add_argument("-t", "--tree", required=True)
 parser.add_argument("-n", "--file", required=True)
 parser.add_argument("-f", "--format", required=True)
 parser.add_argument("-o", "--output", type=str, default="tree")
-parser.add_argument("-s", "--subset", type=validate_subset)
+parser.add_argument("-s", "--subset", type=validate_subsets)
 parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
 parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
 parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
