@@ -43,15 +43,8 @@ def validate_frequency(freq_type):
 def validate_outgroup(outgroup_reps, leaves):
     outgroup_reps = outgroup_reps.split(",")
 
-    if outgroup_reps[0] != "NONE":
-
-        if outgroup_reps[0] not in leaves:
-            raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
-
-        elif len(outgroup_reps) > 1:
-
-            if outgroup_reps[1] not in leaves:
-                raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
+    if any(rep not in leaves for rep in outgroup_reps):
+        raise argparse.ArgumentTypeError("Invalid outgroup, make sure to check spelling!")
 
     return outgroup_reps
 
