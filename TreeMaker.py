@@ -10,6 +10,7 @@ optional arguments: -m or --mode, type of BarChartFace to load (all or fymink/ga
 
 import argparse
 import sys
+import os
 from Bio import SeqIO
 from Taxon import Taxon
 from ete3 import Tree, faces, TreeStyle, BarChartFace, TextFace
@@ -143,6 +144,7 @@ def main(args):
 
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
+    out = args.output + ".png"
 
     if args.outgroup_reps is not None:
 
@@ -198,13 +200,18 @@ def main(args):
 
     # render tree
     tree.render(
-        file_name=args.output + ".png",
+        file_name=out,
         units="px", h=200 * len(leaves),
         tree_style=tree_style,
         layout=layout
     )
 
-    print("Done.")
+    print("\nFinished.\n")
+
+    if os.path.exists(out):
+        print(f"Tree is successfully created under {out}")
+    else:
+        print("Something went wrong, tree not generated.")
 
 
 # Guard against undesired invocation upon import
