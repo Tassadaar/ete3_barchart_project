@@ -60,9 +60,9 @@ parser.add_argument("-t", "--tree", required=True)
 parser.add_argument("-n", "--file", required=True)
 parser.add_argument("-f", "--format", required=True)
 parser.add_argument("-o", "--output", type=str, default="tree")
-parser.add_argument("-s", "--subset", type=validate_subsets)
+parser.add_argument("-s", "--subsets", type=validate_subsets, nargs="?")
 parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
-parser.add_argument("-g", "--outgroup_reps", type=str, default="none")
+parser.add_argument("-g", "--outgroup_reps", type=str, nargs="?")
 parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
 
@@ -156,14 +156,18 @@ def main(args):
     tree = Tree(args.tree)  # tree "growing"
     leaves = tree.get_leaf_names()
 
-    try:
-        outgroup_reps = validate_outgroup(args.outgroup_reps, leaves)
-    except argparse.ArgumentTypeError as e:
-        print(e)
-        sys.exit()
+    if args.outgroup_reps is not None:
+
+        try:
+            outgroup_reps = validate_outgroup(args.outgroup_reps, leaves)
+        except argparse.ArgumentTypeError as e:
+            print(e)
+            sys.exit()
+
+        tree = root(tree, outgroup_reps)
 
     frequency_type = args.frequency_type
-    subsets = args.subset  # a list assumed to have two items
+    subsets = args.subsets  # a list assumed to have two items
     chi2_score = args.show_chi2_score
 
     taxa_dict = {}  # dictionary to store taxa
@@ -174,10 +178,6 @@ def main(args):
         new_taxon = Taxon(seq_record.id, seq_record.seq)
         all_seq += str(seq_record.seq).replace("-", "")
         taxa_dict[seq_record.id] = new_taxon  # get taxa dict
-
-    # tree rooting
-    if outgroup_reps[0] != "NONE":  # check if rooting is required
-        tree = root(tree, outgroup_reps)
 
     # calculate relative frequencies if specified
     if frequency_type == "relative" or chi2_score is True:
