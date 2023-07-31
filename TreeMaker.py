@@ -53,18 +53,6 @@ def validate_outgroup(outgroup_reps, leaves):
 the above functions are for argument validation
 """
 
-# specify options, disable for debugging
-parser = argparse.ArgumentParser(description="Tree making")
-
-parser.add_argument("-t", "--tree", required=True)
-parser.add_argument("-n", "--file", required=True)
-parser.add_argument("-f", "--format", required=True)
-parser.add_argument("-o", "--output", type=str, default="tree")
-parser.add_argument("-s", "--subsets", type=validate_subsets, nargs="?")
-parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
-parser.add_argument("-g", "--outgroup_reps", type=str, nargs="?")
-parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
-
 
 # layout function
 def layout(node):
@@ -168,7 +156,7 @@ def main(args):
 
     frequency_type = args.frequency_type
     subsets = args.subsets  # a list assumed to have two items
-    chi2_score = args.show_chi2_score
+    show_chi2_score = args.show_chi2_score
 
     taxa_dict = {}  # dictionary to store taxa
     all_seq = ""  # string to hold all the sequences in the alignment
@@ -180,14 +168,14 @@ def main(args):
         taxa_dict[seq_record.id] = new_taxon  # get taxa dict
 
     # calculate relative frequencies if specified
-    if frequency_type == "relative" or chi2_score is True:
+    if frequency_type == "relative" or show_chi2_score is True:
         # calculate average frequency
         avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
     # determine which frequencies to display
     for taxon in taxa_dict.values():
 
-        if subsets[0] == "NONE":
+        if subsets is None:
 
             if frequency_type == "relative":
                 taxon.set_all_relative_freq(avg_freq_dict)
@@ -200,7 +188,7 @@ def main(args):
                 taxon.set_subset_relative_freq(subsets, avg_freq_dict)
                 taxon.display_max_value = 0.05
 
-        if chi2_score is True:
+        if show_chi2_score is True:
             taxon.calculate_chi_square(avg_freq_dict)
 
     # tree styling
@@ -222,6 +210,18 @@ def main(args):
 # Guard against undesired invocation upon import
 if __name__ == "__main__":
     all_amino_acids = "ACDEFGHIKLMNPQRSTVWY"
+
+    # specify options, disable for debugging
+    parser = argparse.ArgumentParser(description="Tree making")
+
+    parser.add_argument("-t", "--tree", required=True)
+    parser.add_argument("-n", "--file", required=True)
+    parser.add_argument("-f", "--format", required=True)
+    parser.add_argument("-o", "--output", type=str, default="tree")
+    parser.add_argument("-s", "--subsets", type=validate_subsets, nargs="?")
+    parser.add_argument("-m", "--frequency_type", type=validate_frequency, default="absolute")
+    parser.add_argument("-g", "--outgroup_reps", type=str, nargs="?")
+    parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
     tree = None
     taxa_dict = None
