@@ -1,11 +1,17 @@
 """
-This program makes a simple unrooted tree from a newwick string, make BarChartFace for each leaf node in layout and
+This program creates a simple unrooted tree from a newick string, makes BarChartFace for each leaf node in layout and
 render said tree to a PNG image.
 
 mandatory arguments: -t or --tree, newick tree
                      -n or --filename, path to alignment file
                      -f or --format, format of said alignment file (only tested for fasta)
-optional arguments: -m or --mode, type of BarChartFace to load (all or fymink/garp subsets)
+optional arguments: -o or --output, desired name for output file, defaults to "tree".png
+                    -s or --subsets, two subsets of amino acids to be highlighted, entered as a comma delimited string
+                    -m or --frequency_type, type of frequency to display, "absolute" or "relative"
+                    -g or --outgroup_reps, chosen outgroup(s) for rooting
+                    -c or --show_chi2_score, whether to display chi-square score
+
+Authors: Jason Shao, Joran Martijn
 """
 
 import argparse
