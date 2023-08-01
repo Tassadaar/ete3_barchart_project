@@ -11,19 +11,20 @@ class Taxon:
         self.name = name
         self.seq = str(seq).replace("-", "")
         self.freqs = {aa: self.seq.count(aa) / len(self.seq) for aa in self.all_amino_acids}
-        self.display_freqs = self.freqs
+        self.display_freqs = [ self.freqs ]
         self.display_max_value = 0.2
-        self.chi_square_score = 0
+        # self.chi_square_score = 0
 
     def set_all_relative_freq(self, avg_freq_dict):
-        self.display_freqs = {aa: self.display_freqs[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
+        relative_freqs = {aa: self.freqs[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
+        self.display_freqs = [ relative_freqs ]
 
     def set_subset_abs_freq(self, subsets):
         group1_freq = {}
         group2_freq = {}
         other_freq = {}
 
-        for key, value in self.display_freqs.items():
+        for key, value in self.freqs.items():
             if key in subsets[0]:
                 group1_freq[key] = value
             elif key in subsets[1]:
@@ -40,11 +41,11 @@ class Taxon:
 
         for aa, avg_freq in avg_freq_dict.items():
             if aa in subsets[0]:
-                group1_rel_freq[aa] = self.display_freqs[0][aa] - avg_freq
+                group1_rel_freq[aa] = self.freqs[aa] - avg_freq
             elif aa in subsets[1]:
-                group2_rel_freq[aa] = self.display_freqs[1][aa] - avg_freq
+                group2_rel_freq[aa] = self.freqs[aa] - avg_freq
             else:
-                other_rel_freq[aa] = self.display_freqs[2][aa] - avg_freq
+                other_rel_freq[aa] = self.freqs[aa] - avg_freq
 
         self.display_freqs = [group1_rel_freq, group2_rel_freq, other_rel_freq]
 
