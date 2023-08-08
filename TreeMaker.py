@@ -30,19 +30,20 @@ class Taxon:
         self.name = name
         self.seq = str(seq).replace("-", "")
         self.freqs = {aa: self.seq.count(aa) / len(self.seq) for aa in self.all_amino_acids}
-        self.display_freqs = self.freqs
+        self.display_freqs = [self.freqs]
         self.display_max_value = 0.2
         self.chi_square_score = 0
 
     def set_all_relative_freq(self, avg_freq_dict):
-        self.display_freqs = {aa: self.display_freqs[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
+        relative_freqs = {aa: self.freqs[aa] - avg_freq for aa, avg_freq in avg_freq_dict.items()}
+        self.display_freqs = [relative_freqs]
 
     def set_subset_abs_freq(self, subsets):
         group1_freq = {}
         group2_freq = {}
         other_freq = {}
 
-        for key, value in self.display_freqs.items():
+        for key, value in self.freqs.items():
             if key in subsets[0]:
                 group1_freq[key] = value
             elif key in subsets[1]:
@@ -118,12 +119,14 @@ the above functions are for argument validation
 """
 
 
-# layout function
+# layout function pre-defined by ete3
 def layout(node):
 
+    # only consider leaf nodes
     if not node.is_leaf():
         return
 
+    # retrieve Taxon from memory
     taxon = taxa_dict[node.name]
     dict_list = taxon.display_freqs
 
@@ -131,19 +134,24 @@ def layout(node):
     for freq_dict in dict_list:
         face = get_barchart_face(freq_dict, taxon.display_max_value)
 
-        if node.name == tree.get_leaf_names()[-1]:
+        # all faces have empty labels except for the bottom row
+        root_node = node.get_tree_root()
+        if node.name == root_node.get_leaf_names()[-1]:
             face.labels = list(freq_dict.keys())
 
-        # ensure a healthy width of gap between the tree and the faces
+        # ensure a healthy amount of space between the tree and the faces
         if i == 1:
             face.margin_left = 50
-        face.margin_right = 10
+        face.margin_right = 10  # same for between faces
 
+        # all faces have no scale except for the right-most column
         if len(freq_dict) > 1 and i != len(dict_list):
-            face.scale_fsize = 1  # this ensures that only one set of scale is shown for all columns
+            face.scale_fsize = 1
+
         faces.add_face_to_node(face=face, node=node, column=i, position="aligned")
         i += 1
 
+    # display chi-square scores if specified
     if taxon.chi_square_score != 0:
         text_face = TextFace(taxon.chi_square_score)
         text_face.margin_left = 50
@@ -166,49 +174,54 @@ def get_barchart_face(freq_dict, max_value):
 
 # if user specified outgroup taxa in the flags then root accordingly
 def root(tree, outgroup_reps):
+
     # check if the outgroup is only one taxon
     if len(outgroup_reps) == 1:
         tree.set_outgroup(outgroup_reps[0])  # just make that one taxon the outgroup
 
         return tree
 
-    # if not, make it monophyletic
+    # if outgroup has multiple taxa then get their common ancestor
     common_ancestor = tree.get_common_ancestor(*outgroup_reps)
 
+    # if common ancestor is not the root then re-root with it as outgroup
     if not common_ancestor.is_root():
         tree.set_outgroup(common_ancestor)
 
         return tree
 
-    # this is a workaround for how ete3 handles unrooted trees, as you cannot reroot to the current "root"
-    # the user needs to provide a proper ingroup based on biological information
-    print("\nCommon ancestor is root, taking a detour")
-    ingroup = input("\nEnter an ingroup taxon: ")
+    # this is a workaround as you cannot re-root to the current "root" with ete3
+    # therefore the user needs to provide an in-group taxon
+    print("\nOutgroup common ancestor is the root node, an in-group taxon is required for re-rooting")
+    ingroup_taxon = input("\nEnter an ingroup taxon: ")
 
     # reject non-leaf inputs
-    while ingroup not in tree.get_leaf_names():
+    while ingroup_taxon not in tree.get_leaf_names():
         print("You entered a taxon that is not a part of the tree, check spelling!")
-        ingroup = input("\nEnter an ingroup taxon: ")
+        ingroup_taxon = input("\nEnter an ingroup taxon: ")
 
     # reject outgroup inputs
-    while ingroup in outgroup_reps:
+    while ingroup_taxon in outgroup_reps:
         print("You entered an outgroup taxon, check spelling!")
-        ingroup = input("\nEnter an ingroup taxon: ")
+        ingroup_taxon = input("\nEnter an ingroup taxon: ")
 
-    tree.set_outgroup(ingroup)
-    common_ancestor = tree.get_common_ancestor(*outgroup_reps)  # get the desired monophyletic outgroup
+    # setting outgroup with an in-group taxon ensures the real outgroup common ancestor is not the root node
+    tree.set_outgroup(ingroup_taxon)
+    common_ancestor = tree.get_common_ancestor(*outgroup_reps)
     tree.set_outgroup(common_ancestor)
 
     return tree
 
 
 def main(args):
-    global tree, taxa_dict
 
-    tree = Tree(args.tree)  # tree "growing"
+    global taxa_dict
+
+    tree = Tree(args.tree, format=1)
     leaves = tree.get_leaf_names()
-    out = args.output + ".png"
+    outfile = args.output + ".png"
 
+    #  check if outgroup(s) is specified
     if args.outgroup_reps is not None:
 
         try:
@@ -226,7 +239,7 @@ def main(args):
     taxa_dict = {}  # dictionary to store taxa
     all_seq = ""  # string to hold all the sequences in the alignment
 
-    # read in fasta and parse, then update
+    # read in fasta to parse for Taxon objects
     for seq_record in SeqIO.parse(args.file, args.format):
         new_taxon = Taxon(seq_record.id, seq_record.seq)
         all_seq += str(seq_record.seq).replace("-", "")
@@ -237,18 +250,23 @@ def main(args):
         # calculate average frequency
         avg_freq_dict = {aa: all_seq.count(aa) / len(all_seq) for aa in all_amino_acids}
 
-    # determine which frequencies to display
+    # determine which frequencies to display, as there are a total of 4 scenarios
     for taxon in taxa_dict.values():
 
         if subsets is None:
+            # scenario 1: no subsets, absolute frequencies
+            # not show as it is the default behaviour
 
+            # scenario 2: no subsets, relative frequencies
             if frequency_type == "relative":
                 taxon.set_all_relative_freq(avg_freq_dict)
                 taxon.display_max_value = 0.05
 
         else:
+            # scenario 3: subsets, absolute frequencies
             taxon.set_subset_abs_freq(subsets)
 
+            # scenario 4: subsets, relative frequencies
             if frequency_type == "relative":
                 taxon.set_subset_relative_freq(subsets, avg_freq_dict)
                 taxon.display_max_value = 0.05
@@ -263,7 +281,7 @@ def main(args):
 
     # render tree
     tree.render(
-        file_name=out,
+        file_name=outfile,
         units="px", h=200 * len(leaves),
         tree_style=tree_style,
         layout=layout
@@ -271,8 +289,8 @@ def main(args):
 
     print("\nFinished.\n")
 
-    if os.path.exists(out):
-        print(f"Tree is successfully created under {out}")
+    if os.path.exists(outfile):
+        print(f"Tree is successfully created under {outfile}")
     else:
         print("Something went wrong, tree not generated.")
 
@@ -293,19 +311,7 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--outgroup_reps", type=str, nargs="?")
     parser.add_argument("-c", "--show_chi2_score", type=bool, default=False)
 
-    tree = None
     taxa_dict = None
-
-    # emulating commandline arguments for debugging, disable for normal execution
-    # sys.argv = [
-    #             "TreeMaker.py",
-    #             "-t", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln.treefile",
-    #             "-n", "Martijn_et_al_2019/alphaproteobacteria_untreated.aln",
-    #             "-f", "fasta",
-    #             "-s", "fymink,garp",
-    #             "-m", "relative",
-    #             "-g", "Dechloromonas_aromatica_RCB,Pseudomonas_aeruginosa_PA7"
-    # ]
 
     arguments = parser.parse_args()
     main(arguments)

@@ -1,5 +1,5 @@
 from unittest import TestCase
-from Taxon import Taxon
+from TreeMaker import Taxon
 
 
 class TestTaxon(TestCase):
