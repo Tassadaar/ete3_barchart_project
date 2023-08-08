@@ -1,5 +1,5 @@
 from unittest import TestCase
-from TreeMaker import Taxon
+from visualize_compositional_bias import Taxon
 
 
 class TestTaxon(TestCase):

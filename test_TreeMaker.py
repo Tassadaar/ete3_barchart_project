@@ -1,6 +1,6 @@
 from unittest import TestCase
 from ete3 import Tree
-from TreeMaker import root
+from visualize_compositional_bias import root
 
 
 class Test(TestCase):
