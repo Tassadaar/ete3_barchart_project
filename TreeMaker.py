@@ -1,4 +1,18 @@
 """
+Copyright 2023 Jason Shao & Joran Martijn.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.
+If not, see <https://www.gnu.org/licenses/>.
+
+-----------------------------------------------------------------------------------------------------------------------
+
 This program creates a simple unrooted tree from a newick string, makes BarChartFace for each leaf node in layout and
 render said tree to a PNG image.
 
@@ -10,10 +24,7 @@ optional arguments: -o or --output, desired name for output file, defaults to "t
                     -m or --frequency_type, type of frequency to display, "absolute" or "relative"
                     -g or --outgroup_reps, chosen outgroup(s) for rooting
                     -c or --show_chi2_score, whether to display chi-square score
-
-Authors: Jason Shao, Joran Martijn
 """
-
 import argparse
 import sys
 import os
